@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+:root {
+  /* Identidade Zosa (mesma paleta do app de Requisições, para consistência
+     entre as ferramentas internas da igreja) */
+  --color-zosa-dark: #1e4a45;
+  --color-zosa-teal: #2ca79a;
+  --color-zosa-tealsoft: #4fbfb0;
+  --color-zosa-tealbg: #e3f4f1;
+  --color-zosa-cream: #f3eae0;
+  --color-zosa-ink: #1f2430;
+  --color-zosa-muted: #5b6472;
+  --color-zosa-border: #e2e5ea;
+  --color-zosa-warn: #c9922e;
+  --color-zosa-warnbg: #fff3d6;
+  --color-zosa-danger: #d97a6f;
+  --color-zosa-dangerbg: #fdeceb;
+
+  /* Natureza do conteúdo (mantém as cores já usadas na planilha do time) */
+  --color-tipo-reels: #b5540b;
+  --color-tipo-reels-bg: #ffe8d6;
+  --color-tipo-stories: #1f8a4c;
+  --color-tipo-stories-bg: #def7e3;
+  --color-tipo-estatico: #8a6a16;
+  --color-tipo-estatico-bg: #fff3d6;
+  --color-tipo-trend: #a31e77;
+  --color-tipo-trend-bg: #fbe1f0;
+
+  /* Contas geridas pelo app */
+  --color-conta-zosa: #2ca79a;
+  --color-conta-zosa-bg: #e3f4f1;
+  --color-conta-life: #6d5dd3;
+  --color-conta-life-bg: #ece9fb;
+  --color-conta-jet: #2e86c1;
+  --color-conta-jet-bg: #e4f1fa;
+
+  /* Estágios do quadro Scrum */
+  --color-estagio-backlog: #5b6472;
+  --color-estagio-backlog-bg: #eceef1;
+  --color-estagio-sprint: #2e86c1;
+  --color-estagio-sprint-bg: #e4f1fa;
+  --color-estagio-producao: #b5540b;
+  --color-estagio-producao-bg: #ffe8d6;
+  --color-estagio-edicao: #6d5dd3;
+  --color-estagio-edicao-bg: #ece9fb;
+  --color-estagio-pronto: #1e4a45;
+  --color-estagio-pronto-bg: #e3f4f1;
+  --color-estagio-postado: #1f8a4c;
+  --color-estagio-postado-bg: #def7e3;
+  --color-estagio-cancelado: #d97a6f;
+  --color-estagio-cancelado-bg: #fdeceb;
+
+  --background: #ffffff;
+  --foreground: var(--color-zosa-ink);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --color-zosa-dark: var(--color-zosa-dark);
+  --color-zosa-teal: var(--color-zosa-teal);
+  --color-zosa-tealsoft: var(--color-zosa-tealsoft);
+  --color-zosa-tealbg: var(--color-zosa-tealbg);
+  --color-zosa-cream: var(--color-zosa-cream);
+  --color-zosa-ink: var(--color-zosa-ink);
+  --color-zosa-muted: var(--color-zosa-muted);
+  --color-zosa-border: var(--color-zosa-border);
+  --color-zosa-warn: var(--color-zosa-warn);
+  --color-zosa-warnbg: var(--color-zosa-warnbg);
+  --color-zosa-danger: var(--color-zosa-danger);
+  --color-zosa-dangerbg: var(--color-zosa-dangerbg);
+
+  --color-tipo-reels: var(--color-tipo-reels);
+  --color-tipo-reels-bg: var(--color-tipo-reels-bg);
+  --color-tipo-stories: var(--color-tipo-stories);
+  --color-tipo-stories-bg: var(--color-tipo-stories-bg);
+  --color-tipo-estatico: var(--color-tipo-estatico);
+  --color-tipo-estatico-bg: var(--color-tipo-estatico-bg);
+  --color-tipo-trend: var(--color-tipo-trend);
+  --color-tipo-trend-bg: var(--color-tipo-trend-bg);
+
+  --color-conta-zosa: var(--color-conta-zosa);
+  --color-conta-zosa-bg: var(--color-conta-zosa-bg);
+  --color-conta-life: var(--color-conta-life);
+  --color-conta-life-bg: var(--color-conta-life-bg);
+  --color-conta-jet: var(--color-conta-jet);
+  --color-conta-jet-bg: var(--color-conta-jet-bg);
+
+  --color-estagio-backlog: var(--color-estagio-backlog);
+  --color-estagio-backlog-bg: var(--color-estagio-backlog-bg);
+  --color-estagio-sprint: var(--color-estagio-sprint);
+  --color-estagio-sprint-bg: var(--color-estagio-sprint-bg);
+  --color-estagio-producao: var(--color-estagio-producao);
+  --color-estagio-producao-bg: var(--color-estagio-producao-bg);
+  --color-estagio-edicao: var(--color-estagio-edicao);
+  --color-estagio-edicao-bg: var(--color-estagio-edicao-bg);
+  --color-estagio-pronto: var(--color-estagio-pronto);
+  --color-estagio-pronto-bg: var(--color-estagio-pronto-bg);
+  --color-estagio-postado: var(--color-estagio-postado);
+  --color-estagio-postado-bg: var(--color-estagio-postado-bg);
+  --color-estagio-cancelado: var(--color-estagio-cancelado);
+  --color-estagio-cancelado-bg: var(--color-estagio-cancelado-bg);
+}
+
+body {
+  background: var(--color-zosa-cream);
+  color: var(--color-zosa-ink);
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+@layer components {
+  .card {
+    @apply bg-white border border-zosa-border rounded-xl shadow-sm;
+  }
+  .btn-primary {
+    @apply btn bg-zosa-dark text-white hover:bg-zosa-teal;
+  }
+  .btn-secondary {
+    @apply btn bg-white text-zosa-ink border border-zosa-border hover:bg-zosa-cream;
+  }
+  .btn-danger {
+    @apply btn bg-zosa-danger text-white hover:opacity-90;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent text-zosa-muted hover:bg-zosa-cream;
+  }
+  .input {
+    @apply w-full rounded-lg border border-zosa-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zosa-teal;
+  }
+  .label {
+    @apply block text-xs font-medium text-zosa-muted mb-1;
+  }
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap;
+  }
+}
