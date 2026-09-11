@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
 import { useContentItems, useProjetos } from "@/lib/hooks";
@@ -13,6 +13,7 @@ import type { ContentItem } from "@/lib/types";
 
 export default function ProjetoDetalhePage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
   const projetos = useProjetos();
   const { items } = useContentItems();
   const [itemAberto, setItemAberto] = useState<ContentItem | "novo" | null>(null);
@@ -42,6 +43,18 @@ export default function ProjetoDetalhePage() {
     } finally {
       setSalvando(false);
     }
+  }
+
+  async function excluirProjeto() {
+    if (!projeto) return;
+    if (
+      !confirm(
+        `Excluir o projeto "${projeto.nome}"? Os itens de conteúdo continuam existindo, só perdem a ligação com o projeto.`
+      )
+    )
+      return;
+    await api.excluirProjeto(projeto.id);
+    router.push("/projetos");
   }
 
   if (!projeto) {
@@ -88,9 +101,14 @@ export default function ProjetoDetalhePage() {
               {projeto.nome}
             </h1>
           )}
-          <span className="badge bg-zosa-tealbg text-zosa-teal">
-            {entregues}/{itensDoProjeto.length} entregues
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="badge bg-zosa-tealbg text-zosa-teal">
+              {entregues}/{itensDoProjeto.length} entregues
+            </span>
+            <button className="btn-ghost text-zosa-danger !px-2 !py-1 text-xs" onClick={excluirProjeto}>
+              Excluir projeto
+            </button>
+          </div>
         </div>
         {projeto.descricao && <p className="text-sm text-zosa-muted mt-1">{projeto.descricao}</p>}
       </div>

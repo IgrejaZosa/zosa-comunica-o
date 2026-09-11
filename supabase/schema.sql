@@ -65,7 +65,7 @@ create table content_items (
   account_id uuid not null references accounts (id),
   tipo tipo_conteudo not null,
   data_planejada date,
-  projeto_id uuid references projetos (id),
+  projeto_id uuid references projetos (id) on delete set null,
   ideia text not null,
   referencias text,
   observacoes text,

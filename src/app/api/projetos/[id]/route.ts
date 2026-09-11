@@ -26,3 +26,14 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   }
   return NextResponse.json(data);
 }
+
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { erro } = await exigirPerfil();
+  if (erro) return erro;
+
+  const { id } = await params;
+  const supabase = createServiceClient();
+  const { error } = await supabase.from("projetos").delete().eq("id", id);
+  if (error) return erroJson(error.message, 500);
+  return NextResponse.json({ ok: true });
+}

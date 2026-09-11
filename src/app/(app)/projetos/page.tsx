@@ -26,6 +26,18 @@ export default function ProjetosPage() {
     return mapa;
   }, [items]);
 
+  async function excluirProjeto(e: React.MouseEvent, projetoId: string, nomeProjeto: string) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (
+      !confirm(
+        `Excluir o projeto "${nomeProjeto}"? Os itens de conteúdo continuam existindo, só perdem a ligação com o projeto.`
+      )
+    )
+      return;
+    await api.excluirProjeto(projetoId);
+  }
+
   async function criarProjeto(e: React.FormEvent) {
     e.preventDefault();
     if (!nome.trim()) return;
@@ -95,8 +107,20 @@ export default function ProjetosPage() {
         {projetos.map((projeto) => {
           const s = stats.get(projeto.id) ?? { total: 0, entregues: 0 };
           return (
-            <Link key={projeto.id} href={`/projetos/${projeto.id}`} className="card p-4 hover:border-zosa-teal transition-colors">
-              <p className="font-semibold text-zosa-ink">{projeto.nome}</p>
+            <Link
+              key={projeto.id}
+              href={`/projetos/${projeto.id}`}
+              className="card p-4 hover:border-zosa-teal transition-colors relative group"
+            >
+              <button
+                type="button"
+                onClick={(e) => excluirProjeto(e, projeto.id, projeto.nome)}
+                className="absolute top-2 right-2 text-zosa-muted hover:text-zosa-danger opacity-0 group-hover:opacity-100 transition-opacity text-xs"
+                title="Excluir projeto"
+              >
+                ✕
+              </button>
+              <p className="font-semibold text-zosa-ink pr-4">{projeto.nome}</p>
               {projeto.descricao && <p className="text-xs text-zosa-muted mt-0.5 line-clamp-2">{projeto.descricao}</p>}
               <p className="text-xs text-zosa-muted mt-2">
                 {s.entregues} entregue{s.entregues === 1 ? "" : "s"} de {s.total} {s.total === 1 ? "item" : "itens"}

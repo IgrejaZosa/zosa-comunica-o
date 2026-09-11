@@ -27,4 +27,5 @@ export const api = {
 
   criarProjeto: (body: unknown) => chamar("/api/projetos", "POST", body),
   atualizarProjeto: (id: string, body: unknown) => chamar(`/api/projetos/${id}`, "PATCH", body),
+  excluirProjeto: (id: string) => chamar(`/api/projetos/${id}`, "DELETE"),
 };
