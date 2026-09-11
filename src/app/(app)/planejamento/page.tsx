@@ -122,7 +122,7 @@ export default function SprintPlanningPage() {
                 <th className="px-2 py-2">Dia</th>
                 <th className="px-2 py-2">Conta</th>
                 <th className="px-2 py-2">Natureza</th>
-                <th className="px-2 py-2">Criação</th>
+                <th className="px-2 py-2">Filmagem</th>
                 <th className="px-2 py-2">Evento / Motivo</th>
                 <th className="px-2 py-2">Ideia</th>
                 <th className="px-2 py-2">Estágio</th>

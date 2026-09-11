@@ -95,7 +95,9 @@ export interface ContentItem {
   ideia: string;
   referencias: string | null;
   observacoes: string | null;
-  responsavel_criacao_id: string | null;
+  responsavel_filmagem_id: string | null;
+  responsavel_gravacao_id: string | null;
+  responsavel_edicao_id: string | null;
   responsavel_postagem_id: string | null;
   estagio: Estagio;
   sprint_id: string | null;

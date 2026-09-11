@@ -21,7 +21,7 @@ export function ContentItemRow({
   const tipoCor = TIPO_COLORS[item.tipo];
   const estagioCor = ESTAGIO_COLORS[item.estagio];
   const conta = accounts.find((a) => a.id === item.account_id);
-  const criador = profiles.find((p) => p.id === item.responsavel_criacao_id);
+  const filmagem = profiles.find((p) => p.id === item.responsavel_filmagem_id);
   const postador = profiles.find((p) => p.id === item.responsavel_postagem_id);
 
   return (
@@ -33,7 +33,7 @@ export function ContentItemRow({
       <td className="px-2 py-2">
         <Badge label={TIPO_LABELS[item.tipo]} fg={tipoCor.fg} bg={tipoCor.bg} />
       </td>
-      <td className="px-2 py-2 text-xs whitespace-nowrap">{criador?.nome ?? "—"}</td>
+      <td className="px-2 py-2 text-xs whitespace-nowrap">{filmagem?.nome ?? "—"}</td>
       <td className="px-2 py-2 text-xs">{item.evento_motivo ?? "—"}</td>
       <td className="px-2 py-2 text-sm max-w-xs truncate" title={item.ideia}>
         {item.ideia}

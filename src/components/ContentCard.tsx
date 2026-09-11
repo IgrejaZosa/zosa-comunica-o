@@ -15,7 +15,7 @@ export function ContentCard({
 }) {
   const { accounts, profiles } = useSession();
   const conta = accounts.find((a) => a.id === item.account_id);
-  const criador = profiles.find((p) => p.id === item.responsavel_criacao_id);
+  const responsavel = profiles.find((p) => p.id === item.responsavel_filmagem_id);
   const tipoCor = TIPO_COLORS[item.tipo];
 
   return (
@@ -40,15 +40,15 @@ export function ContentCard({
       {item.evento_motivo && !compact && (
         <p className="text-xs text-zosa-muted mt-0.5 truncate">{item.evento_motivo}</p>
       )}
-      {criador && (
+      {responsavel && (
         <div className="flex items-center gap-1 mt-1.5">
           <span
             className="h-4 w-4 rounded-full flex items-center justify-center text-[9px] font-semibold text-white shrink-0"
-            style={{ backgroundColor: criador.cor }}
+            style={{ backgroundColor: responsavel.cor }}
           >
-            {criador.nome.slice(0, 1).toUpperCase()}
+            {responsavel.nome.slice(0, 1).toUpperCase()}
           </span>
-          <span className="text-[11px] text-zosa-muted truncate">{criador.nome}</span>
+          <span className="text-[11px] text-zosa-muted truncate">{responsavel.nome}</span>
         </div>
       )}
     </button>

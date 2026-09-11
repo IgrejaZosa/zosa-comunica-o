@@ -14,6 +14,13 @@ import {
 
 type Defaults = Partial<Pick<ContentItem, "account_id" | "data_planejada" | "estagio" | "tipo">>;
 
+const CAMPOS_RESPONSAVEL = [
+  { campo: "responsavel_filmagem_id", label: "Responsável pela filmagem" },
+  { campo: "responsavel_gravacao_id", label: "Responsável pela gravação" },
+  { campo: "responsavel_edicao_id", label: "Responsável pela edição" },
+  { campo: "responsavel_postagem_id", label: "Responsável pela postagem" },
+] as const;
+
 export function ContentItemModal({
   item,
   defaults,
@@ -32,7 +39,9 @@ export function ContentItemModal({
     ideia: item?.ideia ?? "",
     referencias: item?.referencias ?? "",
     observacoes: item?.observacoes ?? "",
-    responsavel_criacao_id: item?.responsavel_criacao_id ?? "",
+    responsavel_filmagem_id: item?.responsavel_filmagem_id ?? "",
+    responsavel_gravacao_id: item?.responsavel_gravacao_id ?? "",
+    responsavel_edicao_id: item?.responsavel_edicao_id ?? "",
     responsavel_postagem_id: item?.responsavel_postagem_id ?? "",
     estagio: (item?.estagio ?? defaults?.estagio ?? "backlog") as Estagio,
   });
@@ -58,7 +67,9 @@ export function ContentItemModal({
         evento_motivo: form.evento_motivo || null,
         referencias: form.referencias || null,
         observacoes: form.observacoes || null,
-        responsavel_criacao_id: form.responsavel_criacao_id || null,
+        responsavel_filmagem_id: form.responsavel_filmagem_id || null,
+        responsavel_gravacao_id: form.responsavel_gravacao_id || null,
+        responsavel_edicao_id: form.responsavel_edicao_id || null,
         responsavel_postagem_id: form.responsavel_postagem_id || null,
       };
       if (item) {
@@ -195,36 +206,19 @@ export function ContentItemModal({
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="label">Responsável pela criação</label>
-              <select
-                className="input"
-                value={form.responsavel_criacao_id}
-                onChange={(e) => setCampo("responsavel_criacao_id", e.target.value)}
-              >
-                <option value="">—</option>
-                {profiles.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.nome}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="label">Responsável pela postagem</label>
-              <select
-                className="input"
-                value={form.responsavel_postagem_id}
-                onChange={(e) => setCampo("responsavel_postagem_id", e.target.value)}
-              >
-                <option value="">—</option>
-                {profiles.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.nome}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {CAMPOS_RESPONSAVEL.map(({ campo, label }) => (
+              <div key={campo}>
+                <label className="label">{label}</label>
+                <select className="input" value={form[campo]} onChange={(e) => setCampo(campo, e.target.value)}>
+                  <option value="">—</option>
+                  {profiles.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.nome}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
           </div>
 
           <div>
