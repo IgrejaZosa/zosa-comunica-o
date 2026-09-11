@@ -3,7 +3,6 @@
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useSession } from "@/lib/session-context";
-import { useProjetos } from "@/lib/hooks";
 import { Badge } from "@/components/Badge";
 import { ESTAGIO_COLORS, ESTAGIO_LABELS, TIPO_COLORS, TIPO_LABELS, type ContentItem } from "@/lib/types";
 
@@ -18,8 +17,7 @@ export function ContentItemRow({
   onEdit: () => void;
   acaoExtra?: React.ReactNode;
 }) {
-  const { accounts, profiles } = useSession();
-  const projetos = useProjetos();
+  const { accounts, profiles, projetos } = useSession();
   const tipoCor = TIPO_COLORS[item.tipo];
   const estagioCor = ESTAGIO_COLORS[item.estagio];
   const conta = accounts.find((a) => a.id === item.account_id);

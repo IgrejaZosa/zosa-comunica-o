@@ -4,7 +4,8 @@ import { useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
-import { useContentItems, useProjetos } from "@/lib/hooks";
+import { useContentItems } from "@/lib/hooks";
+import { useSession } from "@/lib/session-context";
 import { KanbanBoard } from "@/components/KanbanBoard";
 import { ContentItemModal } from "@/components/ContentItemModal";
 import { ContentItemRow } from "@/components/ContentItemRow";
@@ -14,7 +15,7 @@ import type { ContentItem } from "@/lib/types";
 export default function ProjetoDetalhePage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const projetos = useProjetos();
+  const { projetos } = useSession();
   const { items } = useContentItems();
   const [itemAberto, setItemAberto] = useState<ContentItem | "novo" | null>(null);
   const [editandoNome, setEditandoNome] = useState(false);

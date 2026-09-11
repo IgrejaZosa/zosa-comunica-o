@@ -108,6 +108,8 @@ export interface ContentItem {
   responsavel_gravacao_id: string | null;
   responsavel_edicao_id: string | null;
   responsavel_postagem_id: string | null;
+  responsavel_gravacao_original_id: string | null;
+  responsavel_edicao_original_id: string | null;
   responsavel_postagem_original_id: string | null;
   estagio: Estagio;
   sprint_id: string | null;

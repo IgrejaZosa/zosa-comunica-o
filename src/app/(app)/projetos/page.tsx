@@ -2,11 +2,12 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { useContentItems, useProjetos } from "@/lib/hooks";
+import { useContentItems } from "@/lib/hooks";
+import { useSession } from "@/lib/session-context";
 import { api } from "@/lib/api";
 
 export default function ProjetosPage() {
-  const projetos = useProjetos();
+  const { projetos } = useSession();
   const { items } = useContentItems();
   const [criando, setCriando] = useState(false);
   const [nome, setNome] = useState("");

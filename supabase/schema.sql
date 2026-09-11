@@ -72,9 +72,11 @@ create table content_items (
   responsavel_gravacao_id uuid references profiles (id),
   responsavel_edicao_id uuid references profiles (id),
   responsavel_postagem_id uuid references profiles (id),
-  -- guarda quem foi definido pra postagem da PRIMEIRA vez (nao muda
-  -- depois) - comparado com responsavel_postagem_id (atual) o indicador
-  -- de Entregas detecta quando a entrega mudou de pessoa
+  -- guardam quem foi definido pra cada papel da PRIMEIRA vez (nao mudam
+  -- depois) - comparados com os campos atuais, o indicador de Entregas
+  -- detecta quando uma entrega mudou de pessoa
+  responsavel_gravacao_original_id uuid references profiles (id),
+  responsavel_edicao_original_id uuid references profiles (id),
   responsavel_postagem_original_id uuid references profiles (id),
   estagio estagio_conteudo not null default 'backlog',
   sprint_id uuid references sprints (id),
@@ -101,14 +103,32 @@ create trigger content_items_set_updated_at
   before update on content_items
   for each row execute procedure set_updated_at();
 
-create function capturar_responsavel_postagem_original()
+create function capturar_responsaveis_originais()
 returns trigger as $$
 begin
   if TG_OP = 'INSERT' then
+    if new.responsavel_gravacao_id is not null then
+      new.responsavel_gravacao_original_id := new.responsavel_gravacao_id;
+    end if;
+    if new.responsavel_edicao_id is not null then
+      new.responsavel_edicao_original_id := new.responsavel_edicao_id;
+    end if;
     if new.responsavel_postagem_id is not null then
       new.responsavel_postagem_original_id := new.responsavel_postagem_id;
     end if;
   elsif TG_OP = 'UPDATE' then
+    if old.responsavel_gravacao_original_id is not null then
+      new.responsavel_gravacao_original_id := old.responsavel_gravacao_original_id;
+    elsif new.responsavel_gravacao_id is not null then
+      new.responsavel_gravacao_original_id := new.responsavel_gravacao_id;
+    end if;
+
+    if old.responsavel_edicao_original_id is not null then
+      new.responsavel_edicao_original_id := old.responsavel_edicao_original_id;
+    elsif new.responsavel_edicao_id is not null then
+      new.responsavel_edicao_original_id := new.responsavel_edicao_id;
+    end if;
+
     if old.responsavel_postagem_original_id is not null then
       new.responsavel_postagem_original_id := old.responsavel_postagem_original_id;
     elsif new.responsavel_postagem_id is not null then
@@ -119,9 +139,9 @@ begin
 end;
 $$ language plpgsql;
 
-create trigger content_items_capturar_postagem_original
+create trigger content_items_capturar_responsaveis_originais
   before insert or update on content_items
-  for each row execute procedure capturar_responsavel_postagem_original();
+  for each row execute procedure capturar_responsaveis_originais();
 
 -- ---------- Apontamento de tempo por tarefa/pessoa ----------
 create table time_logs (

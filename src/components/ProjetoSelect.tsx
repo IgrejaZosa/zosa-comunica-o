@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useProjetos } from "@/lib/hooks";
+import { useSession } from "@/lib/session-context";
 import { api } from "@/lib/api";
 
 /** Select de projeto (evento, série de pregações, chamada...) com opção
@@ -15,7 +15,7 @@ export function ProjetoSelect({
   onChange: (projetoId: string) => void;
   label?: string;
 }) {
-  const projetos = useProjetos();
+  const { projetos } = useSession();
   const [criando, setCriando] = useState(false);
   const [nomeNovo, setNomeNovo] = useState("");
   const [salvando, setSalvando] = useState(false);

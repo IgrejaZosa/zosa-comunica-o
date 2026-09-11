@@ -21,11 +21,24 @@ import {
   ESTAGIO_QUADRO,
   TIPO_COLORS,
   TIPO_LABELS,
+  type ContentItem,
   type Estagio,
   type TipoConteudo,
 } from "@/lib/types";
 
 const PESSOAS_ENTREGA = ["Braian", "Samuel", "Matheus"];
+
+/** Uma "entrega" conta qualquer papel atribuído à pessoa - gravação,
+ * edição ou postagem - não só quem posta no final. */
+const PAPEIS_ENTREGA: {
+  atual: "responsavel_gravacao_id" | "responsavel_edicao_id" | "responsavel_postagem_id";
+  original: "responsavel_gravacao_original_id" | "responsavel_edicao_original_id" | "responsavel_postagem_original_id";
+  label: string;
+}[] = [
+  { atual: "responsavel_gravacao_id", original: "responsavel_gravacao_original_id", label: "Gravação" },
+  { atual: "responsavel_edicao_id", original: "responsavel_edicao_original_id", label: "Edição" },
+  { atual: "responsavel_postagem_id", original: "responsavel_postagem_original_id", label: "Postagem" },
+];
 
 export default function IndicadoresPage() {
   const { items } = useContentItems();
@@ -81,20 +94,32 @@ export default function IndicadoresPage() {
       }));
   }, [sprints, items]);
 
+  const totalMacro = useMemo(
+    () => ({
+      planejado: itemsDoMes.length,
+      postado: itemsDoMes.filter((i) => i.estagio === "postado").length,
+    }),
+    [itemsDoMes]
+  );
+
   const entregasPorPessoa = useMemo(() => {
     return PESSOAS_ENTREGA.map((nomePessoa) => {
       const pessoa = profiles.find((p) => p.nome === nomePessoa);
       if (!pessoa) return null;
-      const previstos = itemsDoMes.filter((i) => i.responsavel_postagem_original_id === pessoa.id);
-      const trocas = previstos.filter(
-        (i) => i.responsavel_postagem_id && i.responsavel_postagem_id !== i.responsavel_postagem_original_id
-      );
-      return {
-        pessoa,
-        previsto: previstos.length,
-        realizado: previstos.filter((i) => i.estagio === "postado").length,
-        trocas,
-      };
+      let previsto = 0;
+      let realizado = 0;
+      const trocas: { item: ContentItem; papel: string; assumidoPorId: string | null }[] = [];
+      for (const item of itemsDoMes) {
+        for (const { atual, original, label } of PAPEIS_ENTREGA) {
+          if (item[original] !== pessoa.id) continue;
+          previsto++;
+          if (item.estagio === "postado") realizado++;
+          if (item[atual] && item[atual] !== item[original]) {
+            trocas.push({ item, papel: label, assumidoPorId: item[atual] });
+          }
+        }
+      }
+      return { pessoa, previsto, realizado, trocas };
     }).filter((p): p is NonNullable<typeof p> => p !== null);
   }, [itemsDoMes, profiles]);
 
@@ -121,7 +146,15 @@ export default function IndicadoresPage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <div className="card p-4 bg-zosa-dark">
+          <p className="text-xs font-semibold text-zosa-tealsoft">Total (todos os tipos)</p>
+          <p className="text-2xl font-bold text-white mt-1">
+            {totalMacro.postado}
+            <span className="text-base font-normal text-zosa-tealsoft"> / {totalMacro.planejado}</span>
+          </p>
+          <p className="text-xs text-zosa-tealsoft">entregues / programados</p>
+        </div>
         {planejadoXPostado.map((r) => (
           <div key={r.tipo} className="card p-4">
             <p className="text-xs font-semibold" style={{ color: r.cor }}>
@@ -139,8 +172,8 @@ export default function IndicadoresPage() {
       <div className="card p-4">
         <h2 className="text-sm font-semibold text-zosa-ink mb-1">Entregas por pessoa (mês)</h2>
         <p className="text-xs text-zosa-muted mb-3">
-          Previsto = quem foi definido pra postar primeiro. Trocas = quantas vezes quem realmente postou acabou
-          sendo outra pessoa.
+          Previsto = quantas vezes a pessoa foi atribuída (gravação, edição ou postagem). Trocas = quantas vezes
+          quem assumiu de fato acabou sendo outra pessoa.
         </p>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
@@ -173,12 +206,12 @@ export default function IndicadoresPage() {
         {entregasPorPessoa.some((p) => p.trocas.length > 0) && (
           <ul className="mt-3 space-y-1 text-xs text-zosa-muted border-t border-zosa-border pt-2">
             {entregasPorPessoa.flatMap(({ pessoa, trocas }) =>
-              trocas.map((item) => {
-                const quemPostou = profiles.find((p) => p.id === item.responsavel_postagem_id);
+              trocas.map(({ item, papel, assumidoPorId }) => {
+                const quemAssumiu = profiles.find((p) => p.id === assumidoPorId);
                 return (
-                  <li key={item.id}>
-                    <span className="text-zosa-ink">{item.ideia}</span> — previsto p/ {pessoa.nome}, quem postou:{" "}
-                    <span className="font-medium text-zosa-ink">{quemPostou?.nome ?? "—"}</span>
+                  <li key={`${item.id}-${papel}`}>
+                    <span className="text-zosa-ink">{item.ideia}</span> — {papel} prevista p/ {pessoa.nome}, quem
+                    assumiu: <span className="font-medium text-zosa-ink">{quemAssumiu?.nome ?? "—"}</span>
                   </li>
                 );
               })

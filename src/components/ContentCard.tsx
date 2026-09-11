@@ -1,7 +1,6 @@
 "use client";
 
 import { useSession } from "@/lib/session-context";
-import { useProjetos } from "@/lib/hooks";
 import { Badge } from "@/components/Badge";
 import { TIPO_COLORS, TIPO_LABELS, type ContentItem } from "@/lib/types";
 
@@ -14,8 +13,7 @@ export function ContentCard({
   onClick: () => void;
   compact?: boolean;
 }) {
-  const { accounts, profiles } = useSession();
-  const projetos = useProjetos();
+  const { accounts, profiles, projetos } = useSession();
   const conta = accounts.find((a) => a.id === item.account_id);
   const responsavel = profiles.find((p) => p.id === item.responsavel_gravacao_id);
   const projeto = projetos.find((p) => p.id === item.projeto_id);

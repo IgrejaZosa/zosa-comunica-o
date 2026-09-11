@@ -14,7 +14,7 @@ import {
   startOfWeek,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useContentItems, useProjetos } from "@/lib/hooks";
+import { useContentItems } from "@/lib/hooks";
 import { useSession } from "@/lib/session-context";
 import { ContentCard } from "@/components/ContentCard";
 import { ContentItemModal } from "@/components/ContentItemModal";
@@ -24,8 +24,7 @@ const DIAS_SEMANA = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
 export default function CalendarioPage() {
   const { items } = useContentItems();
-  const { accounts } = useSession();
-  const projetos = useProjetos();
+  const { accounts, projetos } = useSession();
   const [mesRef, setMesRef] = useState(() => new Date());
   const [contaFiltro, setContaFiltro] = useState<string | null>(null);
   const [projetoFiltro, setProjetoFiltro] = useState<string | null>(null);
