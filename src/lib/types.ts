@@ -86,16 +86,25 @@ export interface Sprint {
   created_at: string;
 }
 
+/** Um projeto agrupa o conteúdo de um evento, série de pregações, chamada
+ * etc - permite ver o andamento/planejamento daquele tema isolado, além
+ * da visão geral que já existia. */
+export interface Projeto {
+  id: string;
+  nome: string;
+  descricao: string | null;
+  created_at: string;
+}
+
 export interface ContentItem {
   id: string;
   account_id: string;
   tipo: TipoConteudo;
   data_planejada: string | null; // ISO date
-  evento_motivo: string | null;
+  projeto_id: string | null;
   ideia: string;
   referencias: string | null;
   observacoes: string | null;
-  responsavel_filmagem_id: string | null;
   responsavel_gravacao_id: string | null;
   responsavel_edicao_id: string | null;
   responsavel_postagem_id: string | null;

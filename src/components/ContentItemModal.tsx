@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSession } from "@/lib/session-context";
 import { api } from "@/lib/api";
 import { TimeTracker } from "@/components/TimeTracker";
+import { ProjetoSelect } from "@/components/ProjetoSelect";
 import {
   ESTAGIO_LABELS,
   TIPO_LABELS,
@@ -12,10 +13,9 @@ import {
   type TipoConteudo,
 } from "@/lib/types";
 
-type Defaults = Partial<Pick<ContentItem, "account_id" | "data_planejada" | "estagio" | "tipo">>;
+type Defaults = Partial<Pick<ContentItem, "account_id" | "data_planejada" | "estagio" | "tipo" | "projeto_id">>;
 
 const CAMPOS_RESPONSAVEL = [
-  { campo: "responsavel_filmagem_id", label: "Responsável pela filmagem" },
   { campo: "responsavel_gravacao_id", label: "Responsável pela gravação" },
   { campo: "responsavel_edicao_id", label: "Responsável pela edição" },
   { campo: "responsavel_postagem_id", label: "Responsável pela postagem" },
@@ -35,11 +35,10 @@ export function ContentItemModal({
     account_id: item?.account_id ?? defaults?.account_id ?? accounts[0]?.id ?? "",
     tipo: (item?.tipo ?? defaults?.tipo ?? "reels") as TipoConteudo,
     data_planejada: item?.data_planejada ?? defaults?.data_planejada ?? "",
-    evento_motivo: item?.evento_motivo ?? "",
+    projeto_id: item?.projeto_id ?? defaults?.projeto_id ?? "",
     ideia: item?.ideia ?? "",
     referencias: item?.referencias ?? "",
     observacoes: item?.observacoes ?? "",
-    responsavel_filmagem_id: item?.responsavel_filmagem_id ?? "",
     responsavel_gravacao_id: item?.responsavel_gravacao_id ?? "",
     responsavel_edicao_id: item?.responsavel_edicao_id ?? "",
     responsavel_postagem_id: item?.responsavel_postagem_id ?? "",
@@ -64,10 +63,9 @@ export function ContentItemModal({
       const payload = {
         ...form,
         data_planejada: form.data_planejada || null,
-        evento_motivo: form.evento_motivo || null,
+        projeto_id: form.projeto_id || null,
         referencias: form.referencias || null,
         observacoes: form.observacoes || null,
-        responsavel_filmagem_id: form.responsavel_filmagem_id || null,
         responsavel_gravacao_id: form.responsavel_gravacao_id || null,
         responsavel_edicao_id: form.responsavel_edicao_id || null,
         responsavel_postagem_id: form.responsavel_postagem_id || null,
@@ -174,15 +172,7 @@ export function ContentItemModal({
             </div>
           </div>
 
-          <div>
-            <label className="label">Evento / motivo</label>
-            <input
-              className="input"
-              value={form.evento_motivo}
-              onChange={(e) => setCampo("evento_motivo", e.target.value)}
-              placeholder="Ex: Resgate da Família, GC, Culto de Mulheres…"
-            />
-          </div>
+          <ProjetoSelect value={form.projeto_id} onChange={(v) => setCampo("projeto_id", v)} />
 
           <div>
             <label className="label">Ideia</label>

@@ -40,6 +40,16 @@ create table accounts (
   created_at timestamptz not null default now()
 );
 
+-- ---------- Projetos (eventos, series de pregacoes, chamadas...) que
+-- agrupam itens de conteudo - permitem ver o andamento/planejamento de um
+-- tema isolado, alem da visao geral ----------
+create table projetos (
+  id uuid primary key default gen_random_uuid(),
+  nome text not null unique,
+  descricao text,
+  created_at timestamptz not null default now()
+);
+
 -- ---------- Sprints (semana: sexta pos-almoco -> sexta seguinte pre-almoco) ----------
 create table sprints (
   id uuid primary key default gen_random_uuid(),
@@ -55,11 +65,10 @@ create table content_items (
   account_id uuid not null references accounts (id),
   tipo tipo_conteudo not null,
   data_planejada date,
-  evento_motivo text,
+  projeto_id uuid references projetos (id),
   ideia text not null,
   referencias text,
   observacoes text,
-  responsavel_filmagem_id uuid references profiles (id),
   responsavel_gravacao_id uuid references profiles (id),
   responsavel_edicao_id uuid references profiles (id),
   responsavel_postagem_id uuid references profiles (id),
@@ -135,6 +144,7 @@ create trigger daily_logs_set_updated_at
 
 alter table profiles enable row level security;
 alter table accounts enable row level security;
+alter table projetos enable row level security;
 alter table sprints enable row level security;
 alter table content_items enable row level security;
 alter table time_logs enable row level security;
@@ -145,6 +155,9 @@ create policy "profiles: leitura publica"
 
 create policy "accounts: leitura publica"
   on accounts for select to public using (true);
+
+create policy "projetos: leitura publica"
+  on projetos for select to public using (true);
 
 create policy "sprints: leitura publica"
   on sprints for select to public using (true);
@@ -163,6 +176,7 @@ alter publication supabase_realtime add table content_items;
 alter publication supabase_realtime add table time_logs;
 alter publication supabase_realtime add table sprints;
 alter publication supabase_realtime add table daily_logs;
+alter publication supabase_realtime add table projetos;
 
 -- ---------- Seed das 3 contas ----------
 insert into accounts (nome, handle, cor, cor_bg) values

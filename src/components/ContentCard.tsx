@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession } from "@/lib/session-context";
+import { useProjetos } from "@/lib/hooks";
 import { Badge } from "@/components/Badge";
 import { TIPO_COLORS, TIPO_LABELS, type ContentItem } from "@/lib/types";
 
@@ -14,8 +15,10 @@ export function ContentCard({
   compact?: boolean;
 }) {
   const { accounts, profiles } = useSession();
+  const projetos = useProjetos();
   const conta = accounts.find((a) => a.id === item.account_id);
-  const responsavel = profiles.find((p) => p.id === item.responsavel_filmagem_id);
+  const responsavel = profiles.find((p) => p.id === item.responsavel_gravacao_id);
+  const projeto = projetos.find((p) => p.id === item.projeto_id);
   const tipoCor = TIPO_COLORS[item.tipo];
 
   return (
@@ -37,8 +40,8 @@ export function ContentCard({
       <p className={`text-zosa-ink font-medium leading-snug ${compact ? "text-xs line-clamp-2" : "text-sm line-clamp-3"}`}>
         {item.ideia}
       </p>
-      {item.evento_motivo && !compact && (
-        <p className="text-xs text-zosa-muted mt-0.5 truncate">{item.evento_motivo}</p>
+      {projeto && !compact && (
+        <p className="text-xs text-zosa-muted mt-0.5 truncate">{projeto.nome}</p>
       )}
       {responsavel && (
         <div className="flex items-center gap-1 mt-1.5">

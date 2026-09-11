@@ -3,6 +3,7 @@
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useSession } from "@/lib/session-context";
+import { useProjetos } from "@/lib/hooks";
 import { Badge } from "@/components/Badge";
 import { ESTAGIO_COLORS, ESTAGIO_LABELS, TIPO_COLORS, TIPO_LABELS, type ContentItem } from "@/lib/types";
 
@@ -18,11 +19,13 @@ export function ContentItemRow({
   acaoExtra?: React.ReactNode;
 }) {
   const { accounts, profiles } = useSession();
+  const projetos = useProjetos();
   const tipoCor = TIPO_COLORS[item.tipo];
   const estagioCor = ESTAGIO_COLORS[item.estagio];
   const conta = accounts.find((a) => a.id === item.account_id);
-  const filmagem = profiles.find((p) => p.id === item.responsavel_filmagem_id);
+  const gravacao = profiles.find((p) => p.id === item.responsavel_gravacao_id);
   const postador = profiles.find((p) => p.id === item.responsavel_postagem_id);
+  const projeto = projetos.find((p) => p.id === item.projeto_id);
 
   return (
     <tr className="border-b border-zosa-border hover:bg-zosa-cream/40">
@@ -33,8 +36,8 @@ export function ContentItemRow({
       <td className="px-2 py-2">
         <Badge label={TIPO_LABELS[item.tipo]} fg={tipoCor.fg} bg={tipoCor.bg} />
       </td>
-      <td className="px-2 py-2 text-xs whitespace-nowrap">{filmagem?.nome ?? "—"}</td>
-      <td className="px-2 py-2 text-xs">{item.evento_motivo ?? "—"}</td>
+      <td className="px-2 py-2 text-xs whitespace-nowrap">{gravacao?.nome ?? "—"}</td>
+      <td className="px-2 py-2 text-xs">{projeto?.nome ?? "—"}</td>
       <td className="px-2 py-2 text-sm max-w-xs truncate" title={item.ideia}>
         {item.ideia}
       </td>

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { ContentItem, DailyLog, Sprint, TimeLog } from "@/lib/types";
+import type { ContentItem, DailyLog, Projeto, Sprint, TimeLog } from "@/lib/types";
 
 function ordenarContentItems(items: ContentItem[]): ContentItem[] {
   return [...items].sort((a, b) => {
@@ -110,6 +110,55 @@ export function useSprints() {
   }, [supabase]);
 
   return sprints;
+}
+
+/** Projetos (eventos, séries de pregações, chamadas...) que agrupam
+ * itens de conteúdo - com Realtime pra uma pessoa criar um projeto novo
+ * na ficha e todo mundo já ver ele na lista. */
+export function useProjetos() {
+  const supabase = useMemo(() => createClient(), []);
+  const [projetos, setProjetos] = useState<Projeto[]>([]);
+
+  useEffect(() => {
+    let ativo = true;
+
+    supabase
+      .from("projetos")
+      .select("*")
+      .order("nome")
+      .then(({ data, error }) => {
+        if (!ativo) return;
+        if (error) console.error("useProjetos:", error.message);
+        setProjetos((data ?? []) as Projeto[]);
+      });
+
+    const channel = supabase
+      .channel("projetos-changes")
+      .on("postgres_changes", { event: "*", schema: "public", table: "projetos" }, (payload) => {
+        setProjetos((prev) => {
+          if (payload.eventType === "INSERT") {
+            return [...prev, payload.new as Projeto].sort((a, b) => (a.nome < b.nome ? -1 : 1));
+          }
+          if (payload.eventType === "UPDATE") {
+            return prev
+              .map((p) => (p.id === (payload.new as Projeto).id ? (payload.new as Projeto) : p))
+              .sort((a, b) => (a.nome < b.nome ? -1 : 1));
+          }
+          if (payload.eventType === "DELETE") {
+            return prev.filter((p) => p.id !== (payload.old as Projeto).id);
+          }
+          return prev;
+        });
+      })
+      .subscribe();
+
+    return () => {
+      ativo = false;
+      supabase.removeChannel(channel);
+    };
+  }, [supabase]);
+
+  return projetos;
 }
 
 export function useTimeLogs(contentItemId: string) {

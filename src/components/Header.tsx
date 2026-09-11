@@ -9,6 +9,7 @@ const NAV = [
   { href: "/calendario", label: "Calendário" },
   { href: "/quadro", label: "Quadro" },
   { href: "/backlog", label: "Backlog Mensal" },
+  { href: "/projetos", label: "Projetos" },
   { href: "/planejamento", label: "Sprint Planning" },
   { href: "/sprint", label: "Sprint Atual" },
   { href: "/indicadores", label: "Indicadores" },

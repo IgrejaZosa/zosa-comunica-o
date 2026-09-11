@@ -24,4 +24,7 @@ export const api = {
   atualizarSprint: (id: string, body: unknown) => chamar(`/api/sprints/${id}`, "PATCH", body),
 
   salvarDaily: (body: unknown) => chamar("/api/daily-logs", "POST", body),
+
+  criarProjeto: (body: unknown) => chamar("/api/projetos", "POST", body),
+  atualizarProjeto: (id: string, body: unknown) => chamar(`/api/projetos/${id}`, "PATCH", body),
 };
