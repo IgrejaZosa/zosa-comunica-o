@@ -66,6 +66,21 @@ export function sprintParaData(dataISO: string): { data_inicio: string; data_fim
   };
 }
 
+/** Retorna a sprint seguinte à vigente agora - usada na tela de Sprint
+ * Planning, pra preparar a semana antes dela começar. */
+export function sprintSeguinte(agora: Date = new Date()): {
+  data_inicio: string;
+  data_fim: string;
+} {
+  const atual = sprintVigente(agora);
+  const inicio = new Date(`${atual.data_fim}T00:00:00Z`);
+  const fim = new Date(inicio.getTime() + 7 * 24 * 60 * 60 * 1000);
+  return {
+    data_inicio: atual.data_fim,
+    data_fim: fim.toISOString().slice(0, 10),
+  };
+}
+
 export function formatarPeriodoSprint(data_inicio: string, data_fim: string): string {
   const fmt = (iso: string) => {
     const [, m, d] = iso.split("-");

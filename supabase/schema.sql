@@ -174,6 +174,7 @@ insert into profiles (nome, cor, is_admin) values
   ('Samuel', '#2E86C1', false),
   ('Braian', '#B5540B', false),
   ('Ana', '#6D5DD3', false),
+  ('Matheus', '#DB2777', false),
   ('Madu (secretaria)', '#2CA79A', true);
 
 commit;

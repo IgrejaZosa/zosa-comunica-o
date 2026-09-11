@@ -1,24 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { addMonths, format, parseISO } from "date-fns";
+import { addMonths, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useContentItems } from "@/lib/hooks";
-import { useSession } from "@/lib/session-context";
 import { ContentItemModal } from "@/components/ContentItemModal";
-import { Badge } from "@/components/Badge";
+import { ContentItemRow } from "@/components/ContentItemRow";
 import { api } from "@/lib/api";
-import {
-  ESTAGIO_COLORS,
-  ESTAGIO_LABELS,
-  TIPO_COLORS,
-  TIPO_LABELS,
-  type ContentItem,
-} from "@/lib/types";
+import type { ContentItem } from "@/lib/types";
 
 export default function BacklogPage() {
   const { items } = useContentItems();
-  const { accounts, profiles } = useSession();
   const [mesRef, setMesRef] = useState(() => new Date());
   const [itemAberto, setItemAberto] = useState<ContentItem | "novo" | null>(null);
 
@@ -38,50 +30,6 @@ export default function BacklogPage() {
       data_planejada: format(new Date(), "yyyy-MM-dd"),
       estagio: item.estagio === "backlog" ? "sprint" : item.estagio,
     });
-  }
-
-  function nomeConta(id: string) {
-    return accounts.find((a) => a.id === id)?.handle ?? "—";
-  }
-  function nomePessoa(id: string | null) {
-    return profiles.find((p) => p.id === id)?.nome ?? "—";
-  }
-
-  function Linha({ item }: { item: ContentItem }) {
-    const tipoCor = TIPO_COLORS[item.tipo];
-    const estagioCor = ESTAGIO_COLORS[item.estagio];
-    return (
-      <tr className="border-b border-zosa-border hover:bg-zosa-cream/40">
-        <td className="px-2 py-2 text-xs text-zosa-muted whitespace-nowrap">
-          {item.data_planejada ? format(parseISO(item.data_planejada), "dd/MM (EEE)", { locale: ptBR }) : "—"}
-        </td>
-        <td className="px-2 py-2 text-xs whitespace-nowrap">{nomeConta(item.account_id)}</td>
-        <td className="px-2 py-2">
-          <Badge label={TIPO_LABELS[item.tipo]} fg={tipoCor.fg} bg={tipoCor.bg} />
-        </td>
-        <td className="px-2 py-2 text-xs whitespace-nowrap">{nomePessoa(item.responsavel_criacao_id)}</td>
-        <td className="px-2 py-2 text-xs">{item.evento_motivo ?? "—"}</td>
-        <td className="px-2 py-2 text-sm max-w-xs truncate" title={item.ideia}>
-          {item.ideia}
-        </td>
-        <td className="px-2 py-2">
-          <Badge label={ESTAGIO_LABELS[item.estagio]} fg={estagioCor.fg} bg={estagioCor.bg} />
-        </td>
-        <td className="px-2 py-2 text-xs whitespace-nowrap">{nomePessoa(item.responsavel_postagem_id)}</td>
-        <td className="px-2 py-2 whitespace-nowrap">
-          <div className="flex gap-1">
-            <button className="btn-secondary !px-2 !py-1 text-xs" onClick={() => setItemAberto(item)}>
-              Editar
-            </button>
-            {item.estagio === "backlog" && (
-              <button className="btn-primary !px-2 !py-1 text-xs" onClick={() => moverParaSprint(item)}>
-                + Sprint atual
-              </button>
-            )}
-          </div>
-        </td>
-      </tr>
-    );
   }
 
   return (
@@ -108,7 +56,22 @@ export default function BacklogPage() {
           <p className="text-sm font-semibold text-zosa-ink mb-2">Ideias sem data definida ({semData.length})</p>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
-              <tbody>{semData.map((item) => <Linha key={item.id} item={item} />)}</tbody>
+              <tbody>
+                {semData.map((item) => (
+                  <ContentItemRow
+                    key={item.id}
+                    item={item}
+                    onEdit={() => setItemAberto(item)}
+                    acaoExtra={
+                      item.estagio === "backlog" && (
+                        <button className="btn-primary !px-2 !py-1 text-xs" onClick={() => moverParaSprint(item)}>
+                          + Sprint atual
+                        </button>
+                      )
+                    }
+                  />
+                ))}
+              </tbody>
             </table>
           </div>
         </div>
@@ -131,7 +94,18 @@ export default function BacklogPage() {
           </thead>
           <tbody>
             {doMes.map((item) => (
-              <Linha key={item.id} item={item} />
+              <ContentItemRow
+                key={item.id}
+                item={item}
+                onEdit={() => setItemAberto(item)}
+                acaoExtra={
+                  item.estagio === "backlog" && (
+                    <button className="btn-primary !px-2 !py-1 text-xs" onClick={() => moverParaSprint(item)}>
+                      + Sprint atual
+                    </button>
+                  )
+                }
+              />
             ))}
             {doMes.length === 0 && (
               <tr>

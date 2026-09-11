@@ -20,6 +20,7 @@ export const api = {
   excluirTempo: (id: string) => chamar(`/api/time-logs/${id}`, "DELETE"),
 
   sprintAtual: () => chamar("/api/sprints/current", "GET"),
+  sprintSeguinte: () => chamar("/api/sprints/next", "GET"),
   atualizarSprint: (id: string, body: unknown) => chamar(`/api/sprints/${id}`, "PATCH", body),
 
   salvarDaily: (body: unknown) => chamar("/api/daily-logs", "POST", body),
