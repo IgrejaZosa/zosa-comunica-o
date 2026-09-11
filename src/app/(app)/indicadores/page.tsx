@@ -102,6 +102,21 @@ export default function IndicadoresPage() {
         </button>
       </div>
 
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {planejadoXPostado.map((r) => (
+          <div key={r.tipo} className="card p-4">
+            <p className="text-xs font-semibold" style={{ color: r.cor }}>
+              {r.tipo}
+            </p>
+            <p className="text-2xl font-bold text-zosa-ink mt-1">
+              {r.postado}
+              <span className="text-base font-normal text-zosa-muted"> / {r.planejado}</span>
+            </p>
+            <p className="text-xs text-zosa-muted">entregues / programados</p>
+          </div>
+        ))}
+      </div>
+
       <div className="grid md:grid-cols-2 gap-4">
         <div className="card p-4">
           <h2 className="text-sm font-semibold text-zosa-ink mb-3">Planejado x Postado (por natureza)</h2>

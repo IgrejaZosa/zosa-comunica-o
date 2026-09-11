@@ -14,7 +14,6 @@ import {
   TIPO_COLORS,
   TIPO_LABELS,
   type ContentItem,
-  type Sprint,
 } from "@/lib/types";
 
 export default function BacklogPage() {
@@ -22,7 +21,6 @@ export default function BacklogPage() {
   const { accounts, profiles } = useSession();
   const [mesRef, setMesRef] = useState(() => new Date());
   const [itemAberto, setItemAberto] = useState<ContentItem | "novo" | null>(null);
-  const [sprintAtual, setSprintAtual] = useState<Sprint | null>(null);
 
   const mesStr = format(mesRef, "yyyy-MM");
 
@@ -32,13 +30,14 @@ export default function BacklogPage() {
   );
   const semData = useMemo(() => items.filter((i) => !i.data_planejada), [items]);
 
+  /** "+ Sprint atual" significa "vamos fazer isso nesta semana" - a data
+   * planejada vira hoje (mesmo que já tivesse outra data), e o sprint_id
+   * é recalculado a partir dela no servidor. */
   async function moverParaSprint(item: ContentItem) {
-    let sprint = sprintAtual;
-    if (!sprint) {
-      sprint = (await api.sprintAtual()) as Sprint;
-      setSprintAtual(sprint);
-    }
-    await api.atualizarItem(item.id, { sprint_id: sprint.id, estagio: item.estagio === "backlog" ? "sprint" : item.estagio });
+    await api.atualizarItem(item.id, {
+      data_planejada: format(new Date(), "yyyy-MM-dd"),
+      estagio: item.estagio === "backlog" ? "sprint" : item.estagio,
+    });
   }
 
   function nomeConta(id: string) {

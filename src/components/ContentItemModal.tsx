@@ -12,9 +12,7 @@ import {
   type TipoConteudo,
 } from "@/lib/types";
 
-type Defaults = Partial<
-  Pick<ContentItem, "account_id" | "data_planejada" | "estagio" | "sprint_id" | "tipo">
->;
+type Defaults = Partial<Pick<ContentItem, "account_id" | "data_planejada" | "estagio" | "tipo">>;
 
 export function ContentItemModal({
   item,
@@ -62,7 +60,6 @@ export function ContentItemModal({
         observacoes: form.observacoes || null,
         responsavel_criacao_id: form.responsavel_criacao_id || null,
         responsavel_postagem_id: form.responsavel_postagem_id || null,
-        sprint_id: item?.sprint_id ?? defaults?.sprint_id ?? null,
       };
       if (item) {
         await api.atualizarItem(item.id, payload);

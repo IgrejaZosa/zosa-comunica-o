@@ -48,6 +48,24 @@ export function sprintVigente(agora: Date = new Date()): {
   };
 }
 
+/** Retorna o início (sexta) e fim (sexta seguinte) da sprint que contém a
+ * data informada (ex: a data_planejada de um item) - sem o corte de
+ * horário, já que uma data isolada não tem hora. Usado para que um item
+ * só apareça na sprint cuja janela realmente contém a data planejada. */
+export function sprintParaData(dataISO: string): { data_inicio: string; data_fim: string } {
+  const data = new Date(`${dataISO}T00:00:00Z`);
+  const diaSemana = data.getUTCDay(); // 0=domingo ... 5=sexta ... 6=sabado
+  const diasDesdeSexta = (diaSemana - 5 + 7) % 7;
+
+  const inicio = new Date(data.getTime() - diasDesdeSexta * 24 * 60 * 60 * 1000);
+  const fim = new Date(inicio.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+  return {
+    data_inicio: inicio.toISOString().slice(0, 10),
+    data_fim: fim.toISOString().slice(0, 10),
+  };
+}
+
 export function formatarPeriodoSprint(data_inicio: string, data_fim: string): string {
   const fmt = (iso: string) => {
     const [, m, d] = iso.split("-");

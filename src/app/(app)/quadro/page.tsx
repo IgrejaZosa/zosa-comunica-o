@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { format } from "date-fns";
 import { useContentItems } from "@/lib/hooks";
 import { useSession } from "@/lib/session-context";
 import { KanbanBoard } from "@/components/KanbanBoard";
@@ -81,7 +82,11 @@ export default function QuadroPage() {
           item={itemAberto === "novo" ? null : itemAberto}
           defaults={
             itemAberto === "novo"
-              ? { estagio: "sprint", sprint_id: sprintAtual?.id, account_id: contaFiltro ?? undefined }
+              ? {
+                  estagio: "sprint",
+                  data_planejada: format(new Date(), "yyyy-MM-dd"),
+                  account_id: contaFiltro ?? undefined,
+                }
               : undefined
           }
           onClose={() => setItemAberto(null)}

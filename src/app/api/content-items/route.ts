@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { exigirPerfil, erroJson } from "@/lib/api-helpers";
 import { createServiceClient } from "@/lib/supabase/server";
+import { calcularSprintId } from "@/lib/sprints-server";
 
 export async function POST(request: NextRequest) {
   const { profile, erro } = await exigirPerfil();
@@ -11,13 +12,16 @@ export async function POST(request: NextRequest) {
     return erroJson("Preencha conta, tipo e ideia.");
   }
 
+  const dataPlanejada = body.data_planejada ?? null;
+  const sprintId = await calcularSprintId(dataPlanejada);
+
   const supabase = createServiceClient();
   const { data, error } = await supabase
     .from("content_items")
     .insert({
       account_id: body.account_id,
       tipo: body.tipo,
-      data_planejada: body.data_planejada ?? null,
+      data_planejada: dataPlanejada,
       evento_motivo: body.evento_motivo ?? null,
       ideia: body.ideia,
       referencias: body.referencias ?? null,
@@ -25,7 +29,7 @@ export async function POST(request: NextRequest) {
       responsavel_criacao_id: body.responsavel_criacao_id ?? null,
       responsavel_postagem_id: body.responsavel_postagem_id ?? null,
       estagio: body.estagio ?? "backlog",
-      sprint_id: body.sprint_id ?? null,
+      sprint_id: sprintId,
       ordem: body.ordem ?? 0,
       created_by: profile!.id,
     })

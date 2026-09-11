@@ -151,7 +151,7 @@ export default function SprintPage() {
       {itemAberto && (
         <ContentItemModal
           item={itemAberto === "novo" ? null : itemAberto}
-          defaults={itemAberto === "novo" ? { estagio: "sprint", sprint_id: sprintAtual?.id } : undefined}
+          defaults={itemAberto === "novo" ? { estagio: "sprint", data_planejada: hoje } : undefined}
           onClose={() => setItemAberto(null)}
         />
       )}
