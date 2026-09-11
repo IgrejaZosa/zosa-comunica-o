@@ -25,6 +25,8 @@ import {
   type TipoConteudo,
 } from "@/lib/types";
 
+const PESSOAS_ENTREGA = ["Braian", "Samuel", "Matheus"];
+
 export default function IndicadoresPage() {
   const { items } = useContentItems();
   const timeLogs = useAllTimeLogs();
@@ -79,6 +81,23 @@ export default function IndicadoresPage() {
       }));
   }, [sprints, items]);
 
+  const entregasPorPessoa = useMemo(() => {
+    return PESSOAS_ENTREGA.map((nomePessoa) => {
+      const pessoa = profiles.find((p) => p.nome === nomePessoa);
+      if (!pessoa) return null;
+      const previstos = itemsDoMes.filter((i) => i.responsavel_postagem_original_id === pessoa.id);
+      const trocas = previstos.filter(
+        (i) => i.responsavel_postagem_id && i.responsavel_postagem_id !== i.responsavel_postagem_original_id
+      );
+      return {
+        pessoa,
+        previsto: previstos.length,
+        realizado: previstos.filter((i) => i.estagio === "postado").length,
+        trocas,
+      };
+    }).filter((p): p is NonNullable<typeof p> => p !== null);
+  }, [itemsDoMes, profiles]);
+
   const hojeStr = format(new Date(), "yyyy-MM-dd");
   const atrasados = useMemo(
     () =>
@@ -117,22 +136,58 @@ export default function IndicadoresPage() {
         ))}
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
-        <div className="card p-4">
-          <h2 className="text-sm font-semibold text-zosa-ink mb-3">Planejado x Postado (por natureza)</h2>
-          <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={planejadoXPostado}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E5EA" />
-              <XAxis dataKey="tipo" tick={{ fontSize: 12 }} />
-              <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="planejado" name="Planejado" fill="#5B6472" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="postado" name="Postado" fill="#2CA79A" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+      <div className="card p-4">
+        <h2 className="text-sm font-semibold text-zosa-ink mb-1">Entregas por pessoa (mês)</h2>
+        <p className="text-xs text-zosa-muted mb-3">
+          Previsto = quem foi definido pra postar primeiro. Trocas = quantas vezes quem realmente postou acabou
+          sendo outra pessoa.
+        </p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="text-xs font-semibold text-zosa-muted border-b border-zosa-border">
+                <th className="py-1.5 pr-4">Pessoa</th>
+                <th className="py-1.5 pr-4">Previsto</th>
+                <th className="py-1.5 pr-4">Realizado</th>
+                <th className="py-1.5 pr-4">Trocas</th>
+              </tr>
+            </thead>
+            <tbody>
+              {entregasPorPessoa.map(({ pessoa, previsto, realizado, trocas }) => (
+                <tr key={pessoa.id} className="border-b border-zosa-border last:border-0">
+                  <td className="py-1.5 pr-4 font-medium text-zosa-ink">{pessoa.nome}</td>
+                  <td className="py-1.5 pr-4">{previsto}</td>
+                  <td className="py-1.5 pr-4">{realizado}</td>
+                  <td className="py-1.5 pr-4">
+                    {trocas.length > 0 ? (
+                      <span className="badge bg-zosa-warnbg text-zosa-warn">{trocas.length}</span>
+                    ) : (
+                      <span className="text-zosa-muted">0</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
+        {entregasPorPessoa.some((p) => p.trocas.length > 0) && (
+          <ul className="mt-3 space-y-1 text-xs text-zosa-muted border-t border-zosa-border pt-2">
+            {entregasPorPessoa.flatMap(({ pessoa, trocas }) =>
+              trocas.map((item) => {
+                const quemPostou = profiles.find((p) => p.id === item.responsavel_postagem_id);
+                return (
+                  <li key={item.id}>
+                    <span className="text-zosa-ink">{item.ideia}</span> — previsto p/ {pessoa.nome}, quem postou:{" "}
+                    <span className="font-medium text-zosa-ink">{quemPostou?.nome ?? "—"}</span>
+                  </li>
+                );
+              })
+            )}
+          </ul>
+        )}
+      </div>
 
+      <div className="grid md:grid-cols-2 gap-4">
         <div className="card p-4">
           <h2 className="text-sm font-semibold text-zosa-ink mb-3">Itens por estágio (mês)</h2>
           <ResponsiveContainer width="100%" height={240}>

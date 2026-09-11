@@ -69,38 +69,36 @@ export default function CalendarioPage() {
         </button>
       </div>
 
-      <div className="space-y-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold text-zosa-muted w-16 shrink-0">Contas</span>
-          <button onClick={() => setContaFiltro(null)} className={!contaFiltro ? "btn" : "btn-secondary"}>
-            Todas as contas
-          </button>
-          {accounts.map((a) => (
-            <button
-              key={a.id}
-              onClick={() => setContaFiltro(a.id)}
-              className={contaFiltro === a.id ? "btn" : "btn-secondary"}
-              style={contaFiltro === a.id ? { backgroundColor: a.cor, color: "white" } : undefined}
-            >
-              {a.handle}
-            </button>
-          ))}
+      <div className="flex flex-wrap items-end gap-3">
+        <div>
+          <label className="label">Contas</label>
+          <select
+            className="input min-w-[180px]"
+            value={contaFiltro ?? ""}
+            onChange={(e) => setContaFiltro(e.target.value || null)}
+          >
+            <option value="">Todas as contas</option>
+            {accounts.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.handle}
+              </option>
+            ))}
+          </select>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold text-zosa-muted w-16 shrink-0">Projetos</span>
-          <button onClick={() => setProjetoFiltro(null)} className={!projetoFiltro ? "btn" : "btn-secondary"}>
-            Todos os projetos
-          </button>
-          {projetos.map((p) => (
-            <button
-              key={p.id}
-              onClick={() => setProjetoFiltro(p.id)}
-              className={projetoFiltro === p.id ? "btn" : "btn-secondary"}
-            >
-              {p.nome}
-            </button>
-          ))}
-          {projetos.length === 0 && <span className="text-xs text-zosa-muted">Nenhum projeto criado ainda.</span>}
+        <div>
+          <label className="label">Projetos</label>
+          <select
+            className="input min-w-[180px]"
+            value={projetoFiltro ?? ""}
+            onChange={(e) => setProjetoFiltro(e.target.value || null)}
+          >
+            <option value="">Todos os projetos</option>
+            {projetos.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.nome}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 

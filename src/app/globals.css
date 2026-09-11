@@ -16,15 +16,16 @@
   --color-zosa-danger: #d97a6f;
   --color-zosa-dangerbg: #fdeceb;
 
-  /* Natureza do conteúdo (mantém as cores já usadas na planilha do time) */
-  --color-tipo-reels: #b5540b;
-  --color-tipo-reels-bg: #ffe8d6;
-  --color-tipo-stories: #1f8a4c;
-  --color-tipo-stories-bg: #def7e3;
-  --color-tipo-estatico: #8a6a16;
-  --color-tipo-estatico-bg: #fff3d6;
-  --color-tipo-trend: #a31e77;
-  --color-tipo-trend-bg: #fbe1f0;
+  /* Natureza do conteúdo (mesmas cores da planilha do time, em tons mais
+     vivos/saturados para se destacarem melhor nos cards) */
+  --color-tipo-reels: #e8590c;
+  --color-tipo-reels-bg: #ffe0c7;
+  --color-tipo-stories: #16a34a;
+  --color-tipo-stories-bg: #d1fadf;
+  --color-tipo-estatico: #a16207;
+  --color-tipo-estatico-bg: #fde68a;
+  --color-tipo-trend: #db2777;
+  --color-tipo-trend-bg: #fbcfe8;
 
   /* Contas geridas pelo app */
   --color-conta-zosa: #2ca79a;
