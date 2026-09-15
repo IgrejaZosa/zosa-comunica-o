@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { format, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { useSession } from "@/lib/session-context";
 import { api } from "@/lib/api";
+import { calcularPrazos } from "@/lib/prazos";
 import { TimeTracker } from "@/components/TimeTracker";
 import { ProjetoSelect } from "@/components/ProjetoSelect";
 import {
@@ -148,7 +151,7 @@ export function ContentItemModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="label">Data planejada</label>
+              <label className="label">Data de postagem</label>
               <input
                 type="date"
                 className="input"
@@ -171,6 +174,28 @@ export function ContentItemModal({
               </select>
             </div>
           </div>
+
+          {form.data_planejada && (
+            <div className="flex gap-4 rounded-lg bg-zosa-cream px-3 py-2 text-xs text-zosa-muted">
+              {(() => {
+                const { prazoEdicao, prazoGravacao } = calcularPrazos(form.data_planejada);
+                const fmt = (iso: string) => format(parseISO(iso), "dd/MM (EEE)", { locale: ptBR });
+                return (
+                  <>
+                    <span>
+                      🎥 Gravar até <strong className="text-zosa-ink">{fmt(prazoGravacao)}</strong>
+                    </span>
+                    <span>
+                      ✂️ Editar até <strong className="text-zosa-ink">{fmt(prazoEdicao)}</strong>
+                    </span>
+                    <span>
+                      📤 Postar em <strong className="text-zosa-ink">{fmt(form.data_planejada)}</strong>
+                    </span>
+                  </>
+                );
+              })()}
+            </div>
+          )}
 
           <ProjetoSelect value={form.projeto_id} onChange={(v) => setCampo("projeto_id", v)} />
 

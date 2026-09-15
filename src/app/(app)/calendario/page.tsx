@@ -16,18 +16,25 @@ import {
 import { ptBR } from "date-fns/locale";
 import { useContentItems } from "@/lib/hooks";
 import { useSession } from "@/lib/session-context";
+import { calcularPrazos } from "@/lib/prazos";
 import { ContentCard } from "@/components/ContentCard";
 import { ContentItemModal } from "@/components/ContentItemModal";
 import type { ContentItem } from "@/lib/types";
 
 const DIAS_SEMANA = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
+/** Enquanto o item não chegou nesses estágios, o prazo daquela etapa
+ * ainda é relevante de mostrar como lembrete no calendário. */
+const AINDA_PRECISA_GRAVAR = new Set(["backlog", "sprint", "producao"]);
+const AINDA_PRECISA_EDITAR = new Set(["backlog", "sprint", "producao", "edicao"]);
+
 export default function CalendarioPage() {
   const { items } = useContentItems();
-  const { accounts, projetos } = useSession();
+  const { accounts, projetos, profiles } = useSession();
   const [mesRef, setMesRef] = useState(() => new Date());
   const [contaFiltro, setContaFiltro] = useState<string | null>(null);
   const [projetoFiltro, setProjetoFiltro] = useState<string | null>(null);
+  const [pessoaFiltro, setPessoaFiltro] = useState<string | null>(null);
   const [itemAberto, setItemAberto] = useState<ContentItem | "novo" | null>(null);
   const [novaData, setNovaData] = useState<string | undefined>(undefined);
 
@@ -45,8 +52,34 @@ export default function CalendarioPage() {
     });
   }, [items, contaFiltro, projetoFiltro]);
 
-  function itemsDoDia(dia: Date): ContentItem[] {
-    return itemsFiltrados.filter((i) => i.data_planejada && isSameDay(new Date(i.data_planejada + "T12:00:00"), dia));
+  function ehNoDia(dataIso: string | null, dia: Date): boolean {
+    return !!dataIso && isSameDay(new Date(`${dataIso}T12:00:00`), dia);
+  }
+
+  function itemsPostamNoDia(dia: Date): ContentItem[] {
+    return itemsFiltrados.filter((i) => {
+      if (!ehNoDia(i.data_planejada, dia)) return false;
+      if (pessoaFiltro && i.responsavel_postagem_id !== pessoaFiltro) return false;
+      return true;
+    });
+  }
+
+  function itemsGravamNoDia(dia: Date): ContentItem[] {
+    return itemsFiltrados.filter((i) => {
+      if (!i.data_planejada || !AINDA_PRECISA_GRAVAR.has(i.estagio)) return false;
+      if (!ehNoDia(calcularPrazos(i.data_planejada).prazoGravacao, dia)) return false;
+      if (pessoaFiltro && i.responsavel_gravacao_id !== pessoaFiltro) return false;
+      return true;
+    });
+  }
+
+  function itemsEditamNoDia(dia: Date): ContentItem[] {
+    return itemsFiltrados.filter((i) => {
+      if (!i.data_planejada || !AINDA_PRECISA_EDITAR.has(i.estagio)) return false;
+      if (!ehNoDia(calcularPrazos(i.data_planejada).prazoEdicao, dia)) return false;
+      if (pessoaFiltro && i.responsavel_edicao_id !== pessoaFiltro) return false;
+      return true;
+    });
   }
 
   function abrirNovo(dia: Date) {
@@ -99,7 +132,27 @@ export default function CalendarioPage() {
             ))}
           </select>
         </div>
+        <div>
+          <label className="label">Pessoa</label>
+          <select
+            className="input min-w-[180px]"
+            value={pessoaFiltro ?? ""}
+            onChange={(e) => setPessoaFiltro(e.target.value || null)}
+          >
+            <option value="">Todo mundo</option>
+            {profiles.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.nome}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
+      {pessoaFiltro && (
+        <p className="text-xs text-zosa-muted">
+          Mostrando gravação, edição e postagem atribuídas a essa pessoa - em qualquer papel.
+        </p>
+      )}
 
       <div className="grid grid-cols-7 gap-2 text-center text-xs font-semibold text-zosa-muted">
         {DIAS_SEMANA.map((d) => (
@@ -109,12 +162,14 @@ export default function CalendarioPage() {
 
       <div className="grid grid-cols-7 gap-2">
         {dias.map((dia) => {
-          const doDia = itemsDoDia(dia);
+          const postam = itemsPostamNoDia(dia);
+          const gravam = itemsGravamNoDia(dia);
+          const editam = itemsEditamNoDia(dia);
           const foraDoMes = !isSameMonth(dia, mesRef);
           return (
             <div
               key={dia.toISOString()}
-              className={`rounded-xl border p-1.5 min-h-[110px] flex flex-col gap-1 ${
+              className={`rounded-xl border p-1.5 min-h-[130px] flex flex-col gap-1 ${
                 foraDoMes ? "bg-zosa-cream/40 border-transparent" : "bg-white border-zosa-border"
               }`}
             >
@@ -138,8 +193,29 @@ export default function CalendarioPage() {
                   +
                 </button>
               </div>
-              <div className="flex-1 space-y-1 overflow-y-auto max-h-32">
-                {doDia.map((item) => (
+              <div className="flex-1 space-y-1 overflow-y-auto max-h-36">
+                {gravam.map((item) => (
+                  <button
+                    key={`grav-${item.id}`}
+                    onClick={() => setItemAberto(item)}
+                    className="w-full text-left rounded px-1.5 py-0.5 text-[11px] bg-zosa-tealbg text-zosa-dark truncate hover:opacity-80"
+                    title={`Gravar: ${item.ideia}`}
+                  >
+                    🎥 {item.ideia}
+                  </button>
+                ))}
+                {editam.map((item) => (
+                  <button
+                    key={`edit-${item.id}`}
+                    onClick={() => setItemAberto(item)}
+                    className="w-full text-left rounded px-1.5 py-0.5 text-[11px] truncate hover:opacity-80"
+                    style={{ backgroundColor: "var(--color-tipo-trend-bg)", color: "var(--color-tipo-trend)" }}
+                    title={`Editar: ${item.ideia}`}
+                  >
+                    ✂️ {item.ideia}
+                  </button>
+                ))}
+                {postam.map((item) => (
                   <ContentCard key={item.id} item={item} onClick={() => setItemAberto(item)} compact />
                 ))}
               </div>
