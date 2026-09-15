@@ -14,6 +14,10 @@ export default function SprintPlanningPage() {
   const [proximaSprint, setProximaSprint] = useState<Sprint | null>(null);
   const [meta, setMeta] = useState("");
   const [salvandoMeta, setSalvandoMeta] = useState(false);
+  const [dataInicio, setDataInicio] = useState("");
+  const [dataFim, setDataFim] = useState("");
+  const [salvandoPeriodo, setSalvandoPeriodo] = useState(false);
+  const [erroPeriodo, setErroPeriodo] = useState<string | null>(null);
   const [itemAberto, setItemAberto] = useState<ContentItem | "novo" | null>(null);
 
   useEffect(() => {
@@ -23,6 +27,8 @@ export default function SprintPlanningPage() {
         const sprint = s as Sprint;
         setProximaSprint(sprint);
         setMeta(sprint.meta ?? "");
+        setDataInicio(sprint.data_inicio);
+        setDataFim(sprint.data_fim);
       })
       .catch((err) => console.error("sprintSeguinte:", err));
   }, []);
@@ -54,6 +60,31 @@ export default function SprintPlanningPage() {
     }
   }
 
+  /** Período da sprint calculado (sexta a sexta) às vezes não bate com a
+   * semana real do time - aqui dá pra corrigir manualmente. Itens cuja
+   * data de postagem cair dentro do novo período passam a usar essa
+   * sprint a partir da próxima vez que forem criados/editados. */
+  async function salvarPeriodo() {
+    if (!proximaSprint) return;
+    setErroPeriodo(null);
+    if (!dataInicio || !dataFim || dataFim <= dataInicio) {
+      setErroPeriodo("O fim do período precisa ser depois do início.");
+      return;
+    }
+    setSalvandoPeriodo(true);
+    try {
+      const atualizada = await api.atualizarSprint(proximaSprint.id, {
+        data_inicio: dataInicio,
+        data_fim: dataFim,
+      });
+      setProximaSprint(atualizada as Sprint);
+    } catch (err) {
+      setErroPeriodo(err instanceof Error ? err.message : "Erro ao salvar o período.");
+    } finally {
+      setSalvandoPeriodo(false);
+    }
+  }
+
   /** Puxa um item do backlog pra dentro da próxima sprint: a data
    * planejada vira o início dela (o sprint_id é recalculado a partir
    * disso no servidor). */
@@ -79,17 +110,40 @@ export default function SprintPlanningPage() {
           </div>
           <span className="badge bg-zosa-tealbg text-zosa-teal">{jaProgramados.length} já programados</span>
         </div>
-        <label className="label">Meta da próxima sprint</label>
-        <div className="flex gap-2">
-          <input
-            className="input"
-            value={meta}
-            onChange={(e) => setMeta(e.target.value)}
-            placeholder="O que queremos fechar na semana que vem"
-          />
-          <button className="btn-secondary shrink-0" onClick={salvarMeta} disabled={salvandoMeta}>
-            Salvar meta
-          </button>
+
+        <div className="grid sm:grid-cols-2 gap-3">
+          <div>
+            <label className="label">Meta da próxima sprint</label>
+            <div className="flex gap-2">
+              <input
+                className="input"
+                value={meta}
+                onChange={(e) => setMeta(e.target.value)}
+                placeholder="O que queremos fechar na semana que vem"
+              />
+              <button className="btn-secondary shrink-0" onClick={salvarMeta} disabled={salvandoMeta}>
+                Salvar meta
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="label">Período da sprint</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                className="input"
+                value={dataInicio}
+                onChange={(e) => setDataInicio(e.target.value)}
+              />
+              <span className="text-xs text-zosa-muted shrink-0">até</span>
+              <input type="date" className="input" value={dataFim} onChange={(e) => setDataFim(e.target.value)} />
+              <button className="btn-secondary shrink-0" onClick={salvarPeriodo} disabled={salvandoPeriodo}>
+                Salvar
+              </button>
+            </div>
+            {erroPeriodo && <p className="text-xs text-zosa-danger mt-1">{erroPeriodo}</p>}
+          </div>
         </div>
       </div>
 

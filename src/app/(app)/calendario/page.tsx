@@ -17,7 +17,6 @@ import { ptBR } from "date-fns/locale";
 import { useContentItems } from "@/lib/hooks";
 import { useSession } from "@/lib/session-context";
 import { calcularPrazos } from "@/lib/prazos";
-import { ContentCard } from "@/components/ContentCard";
 import { ContentItemModal } from "@/components/ContentItemModal";
 import type { ContentItem } from "@/lib/types";
 
@@ -216,7 +215,14 @@ export default function CalendarioPage() {
                   </button>
                 ))}
                 {postam.map((item) => (
-                  <ContentCard key={item.id} item={item} onClick={() => setItemAberto(item)} compact />
+                  <button
+                    key={`post-${item.id}`}
+                    onClick={() => setItemAberto(item)}
+                    className="w-full text-left rounded px-1.5 py-0.5 text-[11px] bg-zosa-warnbg text-zosa-warn truncate hover:opacity-80"
+                    title={`Postar: ${item.ideia}`}
+                  >
+                    📤 {item.ideia}
+                  </button>
                 ))}
               </div>
             </div>

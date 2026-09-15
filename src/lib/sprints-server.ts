@@ -26,9 +26,26 @@ export async function garantirSprint(data_inicio: string, data_fim: string): Pro
 
 /** sprint_id de um item deriva sempre da data_planejada: sem data, sem
  * sprint. Isso garante que o Quadro/Sprint Atual só mostrem o que
- * realmente cai na semana da sprint. */
+ * realmente cai na semana da sprint.
+ *
+ * Primeiro procura uma sprint já existente cujo período (possivelmente
+ * ajustado manualmente na tela de Sprint Planning) contenha essa data -
+ * só cai no cálculo padrão (sexta a sexta) se nenhuma cobrir a data. */
 export async function calcularSprintId(dataPlanejada: string | null): Promise<string | null> {
   if (!dataPlanejada) return null;
+
+  const supabase = createServiceClient();
+  const { data: existente, error } = await supabase
+    .from("sprints")
+    .select("*")
+    .lte("data_inicio", dataPlanejada)
+    .gt("data_fim", dataPlanejada)
+    .order("data_inicio", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (existente) return (existente as Sprint).id;
+
   const { data_inicio, data_fim } = sprintParaData(dataPlanejada);
   const sprint = await garantirSprint(data_inicio, data_fim);
   return sprint.id;
