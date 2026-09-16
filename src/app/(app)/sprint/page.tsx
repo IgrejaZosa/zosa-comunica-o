@@ -7,6 +7,7 @@ import { useContentItems, useDailyLogs } from "@/lib/hooks";
 import { useSession } from "@/lib/session-context";
 import { KanbanBoard } from "@/components/KanbanBoard";
 import { ContentItemModal } from "@/components/ContentItemModal";
+import { ContentItemRow } from "@/components/ContentItemRow";
 import { DailyForm } from "@/components/DailyForm";
 import { api } from "@/lib/api";
 import { formatarPeriodoSprint } from "@/lib/sprint";
@@ -40,7 +41,26 @@ export default function SprintPage() {
     [items, sprintAtual]
   );
 
+  const backlogParaEscolher = useMemo(
+    () =>
+      items
+        .filter((i) => i.estagio === "backlog")
+        .sort((a, b) => {
+          const da = a.data_planejada ?? "9999-99-99";
+          const db = b.data_planejada ?? "9999-99-99";
+          return da < db ? -1 : 1;
+        }),
+    [items]
+  );
+
   const concluidos = itemsDaSprint.filter((i) => i.estagio === "postado").length;
+
+  /** Puxa um item do backlog pra dentro da sprint atual: a data
+   * planejada vira hoje (o sprint_id é recalculado a partir dela no
+   * servidor, o que naturalmente cai na sprint vigente). */
+  async function puxarParaSprintAtual(item: ContentItem) {
+    await api.atualizarItem(item.id, { data_planejada: hoje, estagio: "sprint" });
+  }
 
   async function salvarMeta() {
     if (!sprintAtual) return;
@@ -105,6 +125,50 @@ export default function SprintPage() {
           </button>
         </div>
         <KanbanBoard items={itemsDaSprint} onOpenItem={setItemAberto} />
+      </div>
+
+      <div>
+        <h2 className="text-sm font-semibold text-zosa-ink mb-2">
+          Backlog para escolher ({backlogParaEscolher.length})
+        </h2>
+        <div className="card overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b border-zosa-border text-xs font-semibold text-zosa-muted">
+                <th className="px-2 py-2">Dia</th>
+                <th className="px-2 py-2">Conta</th>
+                <th className="px-2 py-2">Natureza</th>
+                <th className="px-2 py-2">Gravação</th>
+                <th className="px-2 py-2">Projeto</th>
+                <th className="px-2 py-2">Ideia</th>
+                <th className="px-2 py-2">Estágio</th>
+                <th className="px-2 py-2">Postagem</th>
+                <th className="px-2 py-2">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {backlogParaEscolher.map((item) => (
+                <ContentItemRow
+                  key={item.id}
+                  item={item}
+                  onEdit={() => setItemAberto(item)}
+                  acaoExtra={
+                    <button className="btn-primary !px-2 !py-1 text-xs" onClick={() => puxarParaSprintAtual(item)}>
+                      + Sprint atual
+                    </button>
+                  }
+                />
+              ))}
+              {backlogParaEscolher.length === 0 && (
+                <tr>
+                  <td colSpan={9} className="px-2 py-6 text-center text-sm text-zosa-muted">
+                    Nenhuma ideia no backlog no momento.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">

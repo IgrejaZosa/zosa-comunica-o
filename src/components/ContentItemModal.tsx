@@ -99,6 +99,21 @@ export function ContentItemModal({
     }
   }
 
+  /** Tira o item de qualquer sprint em que ele esteja: volta pro backlog
+   * e limpa a data de postagem (o sprint_id é recalculado a partir dela
+   * no servidor - sem data, sem sprint). */
+  async function tirarDaSprint() {
+    if (!item) return;
+    setSalvando(true);
+    try {
+      await api.atualizarItem(item.id, { data_planejada: null, estagio: "backlog" });
+      onClose();
+    } catch (err) {
+      setErro(err instanceof Error ? err.message : "Erro ao tirar da sprint.");
+      setSalvando(false);
+    }
+  }
+
   return (
     <div
       className="fixed inset-0 z-50 bg-black/40 flex items-start sm:items-center justify-center p-4 overflow-y-auto"
@@ -251,9 +266,16 @@ export function ContentItemModal({
 
           <div className="flex items-center justify-between pt-2">
             {item ? (
-              <button type="button" className="btn-ghost text-zosa-danger" onClick={excluir} disabled={salvando}>
-                Excluir
-              </button>
+              <div className="flex gap-2">
+                <button type="button" className="btn-ghost text-zosa-danger" onClick={excluir} disabled={salvando}>
+                  Excluir
+                </button>
+                {item.sprint_id && (
+                  <button type="button" className="btn-ghost" onClick={tirarDaSprint} disabled={salvando}>
+                    Tirar da sprint
+                  </button>
+                )}
+              </div>
             ) : (
               <span />
             )}
