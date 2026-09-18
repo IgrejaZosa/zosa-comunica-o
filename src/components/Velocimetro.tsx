@@ -15,14 +15,13 @@ export type StatusVelocimetro = "sem-dados" | "futuro" | "atrasado" | "atencao" 
 const STATUS_INFO: Record<StatusVelocimetro, { cor: string; texto: string }> = {
   "sem-dados": { cor: "var(--color-zosa-muted)", texto: "Sem dados neste período" },
   futuro: { cor: "var(--color-zosa-muted)", texto: "Período ainda não começou" },
-  atrasado: { cor: "var(--color-zosa-danger)", texto: "Atrasado em relação ao ritmo esperado" },
-  atencao: { cor: "var(--color-zosa-warn)", texto: "Um pouco abaixo do ritmo esperado" },
-  "em-dia": { cor: "var(--color-zosa-teal)", texto: "No ritmo esperado" },
+  atrasado: { cor: "var(--color-zosa-danger)", texto: "Avanço ainda baixo" },
+  atencao: { cor: "var(--color-zosa-warn)", texto: "Avanço parcial" },
+  "em-dia": { cor: "var(--color-zosa-teal)", texto: "Bom avanço nas entregas" },
 };
 
-/** Farol/velocímetro: mostra o quanto do que já era esperado até agora
- * (previsto ajustado pela fração do período já decorrida) já foi
- * entregue de fato. `ratio` pode passar de 1 (adiantado). */
+/** Farol/velocímetro: mostra o avanço bruto - quanto já foi entregue do
+ * total previsto no período, não o ritmo esperado até agora. */
 export function Velocimetro({ ratio, status }: { ratio: number; status: StatusVelocimetro }) {
   const cx = 100;
   const cy = 95;

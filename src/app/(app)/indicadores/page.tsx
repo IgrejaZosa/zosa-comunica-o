@@ -19,7 +19,6 @@ import {
   PERIODICIDADES,
   PERIODICIDADE_LABELS,
   formatarPeriodo,
-  fracaoDecorrida,
   navegarPeriodo,
   periodoAtual,
   type Periodicidade,
@@ -166,7 +165,9 @@ export default function IndicadoresPage() {
       })()
     : { previsto: totalMacro.planejado, realizado: totalMacro.postado };
 
-  const agora = new Date();
+  // Farol mostra avanço bruto (quanto já foi entregue do total previsto),
+  // não o ritmo esperado até agora - "quanto já fizemos", não "quanto
+  // estamos atrasados".
   let statusFarol: StatusVelocimetro;
   let ratioFarol: number;
   if (baseFarol.previsto === 0) {
@@ -176,10 +177,8 @@ export default function IndicadoresPage() {
     statusFarol = "futuro";
     ratioFarol = 0;
   } else {
-    const fracao = fracaoDecorrida(periodo.inicio, periodo.fim, agora);
-    const esperado = baseFarol.previsto * fracao;
-    ratioFarol = esperado > 0 ? baseFarol.realizado / esperado : baseFarol.realizado > 0 ? 1 : 0;
-    statusFarol = ratioFarol >= 1 ? "em-dia" : ratioFarol >= 0.7 ? "atencao" : "atrasado";
+    ratioFarol = baseFarol.realizado / baseFarol.previsto;
+    statusFarol = ratioFarol >= 0.8 ? "em-dia" : ratioFarol >= 0.4 ? "atencao" : "atrasado";
   }
 
   return (
@@ -241,12 +240,12 @@ export default function IndicadoresPage() {
 
       <div className="grid md:grid-cols-[280px_1fr] gap-4">
         <div className="card p-6 flex flex-col items-center justify-center">
-          <h2 className="text-sm font-semibold text-zosa-ink mb-1 self-start">Farol da expectativa</h2>
+          <h2 className="text-sm font-semibold text-zosa-ink mb-1 self-start">Farol de avanço</h2>
           <Velocimetro ratio={ratioFarol} status={statusFarol} />
           <p className="text-xs text-zosa-muted text-center mt-1">
             {pessoaFiltro
-              ? "Entregas dessa pessoa até agora vs. o que já era esperado no período."
-              : "Postados até agora vs. o que já era esperado no período."}
+              ? "Quanto dessa pessoa já foi entregue do total previsto no período."
+              : "Quanto já foi postado do total programado no período."}
           </p>
         </div>
 

@@ -69,15 +69,3 @@ export function formatarPeriodo(tipo: Periodicidade, inicio: string, fim: string
       return `${i.getFullYear()}`;
   }
 }
-
-/** Fração (0 a 1) do período já decorrida até `agora` - usada pra
- * comparar o que já foi entregue com o que já era esperado até agora,
- * não com o total do período inteiro (que só fecha no fim dele). */
-export function fracaoDecorrida(inicio: string, fim: string, agora: Date): number {
-  const inicioMs = parseISO(inicio).getTime();
-  const fimMs = parseISO(fim).getTime();
-  const agoraMs = agora.getTime();
-  if (agoraMs <= inicioMs) return 0;
-  if (agoraMs >= fimMs) return 1;
-  return (agoraMs - inicioMs) / (fimMs - inicioMs);
-}
