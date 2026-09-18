@@ -35,7 +35,7 @@ export function Velocimetro({ ratio, status }: { ratio: number; status: StatusVe
 
   return (
     <div className="flex flex-col items-center">
-      <svg viewBox="0 0 200 132" className="w-full max-w-[220px]">
+      <svg viewBox="0 0 200 118" className="w-full max-w-[260px]">
         <path
           d={arcPath(cx, cy, r, 180, 120)}
           stroke="var(--color-zosa-danger)"
@@ -67,11 +67,13 @@ export function Velocimetro({ ratio, status }: { ratio: number; status: StatusVe
           strokeLinecap="round"
         />
         <circle cx={cx} cy={cy} r="7" fill={semDados ? "var(--color-zosa-muted)" : "var(--color-zosa-ink)"} />
-        <text x={cx} y={cy + 32} textAnchor="middle" fontSize="22" fontWeight="700" fill={info.cor}>
-          {semDados ? "—" : `${Math.round(ratio * 100)}%`}
-        </text>
       </svg>
-      <p className="text-xs text-center text-zosa-muted -mt-2">{info.texto}</p>
+      <p className="text-5xl font-extrabold leading-none -mt-2" style={{ color: info.cor }}>
+        {semDados ? "—" : `${Math.round(ratio * 100)}%`}
+      </p>
+      <p className="text-sm font-semibold text-center mt-2" style={{ color: info.cor }}>
+        {info.texto}
+      </p>
     </div>
   );
 }

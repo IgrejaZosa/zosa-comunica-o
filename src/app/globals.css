@@ -142,3 +142,21 @@ body {
     @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap;
   }
 }
+
+/* Relatório em PDF: usa a própria impressão do navegador (Salvar como
+ * PDF) em cima da página já renderizada, escondendo só a navegação e os
+ * controles de filtro - o conteúdo do relatório é o mesmo visto na tela. */
+@media print {
+  header,
+  .no-print {
+    display: none !important;
+  }
+  main {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

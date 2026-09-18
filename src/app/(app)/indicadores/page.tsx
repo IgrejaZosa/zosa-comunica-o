@@ -12,7 +12,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useAllTimeLogs, useContentItems, useSprints } from "@/lib/hooks";
+import { useContentItems, useSprints } from "@/lib/hooks";
 import { useSession } from "@/lib/session-context";
 import { formatarPeriodoSprint } from "@/lib/sprint";
 import {
@@ -56,7 +56,6 @@ const RESPONSAVEIS_ITEM = [
 
 export default function IndicadoresPage() {
   const { items } = useContentItems();
-  const timeLogs = useAllTimeLogs();
   const sprints = useSprints();
   const { profiles } = useSession();
 
@@ -102,23 +101,6 @@ export default function IndicadoresPage() {
       total: itemsDoPeriodo.filter((i) => i.estagio === estagio).length,
     }));
   }, [itemsDoPeriodo]);
-
-  const tempoPorPessoa = useMemo(() => {
-    const doPeriodo = timeLogs.filter(
-      (l) => l.duracao_minutos && l.inicio.slice(0, 10) >= periodo.inicio && l.inicio.slice(0, 10) < periodo.fim
-    );
-    const mapa = new Map<string, number>();
-    for (const log of doPeriodo) {
-      mapa.set(log.user_id, (mapa.get(log.user_id) ?? 0) + (log.duracao_minutos ?? 0));
-    }
-    return profiles
-      .filter((p) => !pessoaFiltro || p.id === pessoaFiltro)
-      .map((p) => {
-        const minutos = mapa.get(p.id) ?? 0;
-        return { nome: p.nome, horas: Math.round((minutos / 60) * 10) / 10, minutos };
-      })
-      .filter((p) => p.minutos > 0);
-  }, [timeLogs, profiles, periodo, pessoaFiltro]);
 
   const velocidadePorSprint = useMemo(() => {
     return sprints
@@ -202,17 +184,22 @@ export default function IndicadoresPage() {
 
   return (
     <div className="space-y-6">
-      <div className="card p-4 space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
-          {PERIODICIDADES.map((tipo) => (
-            <button
-              key={tipo}
-              onClick={() => trocarPeriodicidade(tipo)}
-              className={periodicidade === tipo ? "btn-primary" : "btn-secondary"}
-            >
-              {PERIODICIDADE_LABELS[tipo]}
-            </button>
-          ))}
+      <div className="card p-4 space-y-3 no-print">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {PERIODICIDADES.map((tipo) => (
+              <button
+                key={tipo}
+                onClick={() => trocarPeriodicidade(tipo)}
+                className={periodicidade === tipo ? "btn-primary" : "btn-secondary"}
+              >
+                {PERIODICIDADE_LABELS[tipo]}
+              </button>
+            ))}
+          </div>
+          <button className="btn-secondary" onClick={() => window.print()}>
+            📄 Gerar relatório em PDF
+          </button>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -242,37 +229,21 @@ export default function IndicadoresPage() {
         </div>
       </div>
 
-      <div className="card p-4">
-        <div className="flex flex-wrap items-start gap-4">
-          <div className="shrink-0 text-center px-2">
-            <p className={`text-3xl font-bold ${atrasados.length > 0 ? "text-zosa-danger" : "text-zosa-teal"}`}>
-              {atrasados.length}
-            </p>
-            <p className="text-xs text-zosa-muted whitespace-nowrap">itens atrasados</p>
-          </div>
-          {atrasados.length === 0 ? (
-            <p className="text-sm text-zosa-muted self-center">Nada atrasado. 🎉</p>
-          ) : (
-            <div className="flex-1 min-w-0 flex flex-wrap gap-1.5 content-start pt-1">
-              {atrasados.map((item) => (
-                <span
-                  key={item.id}
-                  className="badge bg-zosa-dangerbg text-zosa-danger max-w-[220px] truncate"
-                  title={`${item.ideia} (${ESTAGIO_LABELS[item.estagio as Estagio]})`}
-                >
-                  {format(parseISO(item.data_planejada!), "dd/MM")} · {item.ideia}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+      <p className="text-sm text-zosa-muted -mt-2">
+        Relatório de <strong className="text-zosa-ink capitalize">{labelPeriodo}</strong>
+        {pessoaFiltro && (
+          <>
+            {" "}
+            · Pessoa: <strong className="text-zosa-ink">{profiles.find((p) => p.id === pessoaFiltro)?.nome}</strong>
+          </>
+        )}
+      </p>
 
-      <div className="grid md:grid-cols-[220px_1fr] gap-4">
-        <div className="card p-4 flex flex-col items-center justify-center">
+      <div className="grid md:grid-cols-[280px_1fr] gap-4">
+        <div className="card p-6 flex flex-col items-center justify-center">
           <h2 className="text-sm font-semibold text-zosa-ink mb-1 self-start">Farol da expectativa</h2>
           <Velocimetro ratio={ratioFarol} status={statusFarol} />
-          <p className="text-[11px] text-zosa-muted text-center mt-1">
+          <p className="text-xs text-zosa-muted text-center mt-1">
             {pessoaFiltro
               ? "Entregas dessa pessoa até agora vs. o que já era esperado no período."
               : "Postados até agora vs. o que já era esperado no período."}
@@ -327,6 +298,32 @@ export default function IndicadoresPage() {
               ))}
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className="card p-4">
+        <div className="flex flex-wrap items-start gap-4">
+          <div className="shrink-0 text-center px-2">
+            <p className={`text-3xl font-bold ${atrasados.length > 0 ? "text-zosa-danger" : "text-zosa-teal"}`}>
+              {atrasados.length}
+            </p>
+            <p className="text-xs text-zosa-muted whitespace-nowrap">itens atrasados</p>
+          </div>
+          {atrasados.length === 0 ? (
+            <p className="text-sm text-zosa-muted self-center">Nada atrasado. 🎉</p>
+          ) : (
+            <div className="flex-1 min-w-0 flex flex-wrap gap-1.5 content-start pt-1">
+              {atrasados.map((item) => (
+                <span
+                  key={item.id}
+                  className="badge bg-zosa-dangerbg text-zosa-danger max-w-[220px] truncate"
+                  title={`${item.ideia} (${ESTAGIO_LABELS[item.estagio as Estagio]})`}
+                >
+                  {format(parseISO(item.data_planejada!), "dd/MM")} · {item.ideia}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -400,25 +397,6 @@ export default function IndicadoresPage() {
               <Bar dataKey="total" fill="#2CA79A" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
-
-        <div className="card p-4">
-          <h2 className="text-sm font-semibold text-zosa-ink mb-3">
-            Tempo gasto por pessoa (horas, {PERIODICIDADE_LABELS[periodicidade].toLowerCase()})
-          </h2>
-          {tempoPorPessoa.length === 0 ? (
-            <p className="text-sm text-zosa-muted">Nenhum apontamento de tempo neste período ainda.</p>
-          ) : (
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={tempoPorPessoa}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E5EA" />
-                <XAxis dataKey="nome" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Bar dataKey="horas" fill="#6D5DD3" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
         </div>
 
         <div className="card p-4">
