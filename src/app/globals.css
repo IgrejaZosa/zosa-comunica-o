@@ -145,7 +145,12 @@ body {
 
 /* Relatório em PDF: usa a própria impressão do navegador (Salvar como
  * PDF) em cima da página já renderizada, escondendo só a navegação e os
- * controles de filtro - o conteúdo do relatório é o mesmo visto na tela. */
+ * controles de filtro - o conteúdo do relatório é o mesmo visto na tela.
+ * Layout pensado pra leitura no celular: uma coluna só (os grids viram
+ * bloco, empilhando os cards), fontes maiores, e cada card inteiro numa
+ * página só - em vez do layout de várias colunas lado a lado que fica
+ * minúsculo quando a página impressa é vista na largura de uma tela de
+ * celular. */
 @media print {
   header,
   .no-print {
@@ -158,5 +163,50 @@ body {
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+  }
+
+  body {
+    font-size: 13pt;
+  }
+  .grid {
+    display: block !important;
+  }
+  .grid > * {
+    margin-bottom: 12px;
+  }
+  .flex {
+    flex-direction: column !important;
+  }
+  .card {
+    margin-bottom: 14px !important;
+    break-inside: avoid;
+    padding: 16px !important;
+  }
+  h1 {
+    font-size: 1.4rem !important;
+  }
+  h2 {
+    font-size: 1.2rem !important;
+  }
+  .text-xs {
+    font-size: 0.9rem !important;
+  }
+  .text-sm {
+    font-size: 1rem !important;
+  }
+  .text-2xl {
+    font-size: 2rem !important;
+  }
+  .text-3xl {
+    font-size: 2.4rem !important;
+  }
+  .truncate,
+  .badge {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+  .max-w-\[220px\] {
+    max-width: 100% !important;
   }
 }
