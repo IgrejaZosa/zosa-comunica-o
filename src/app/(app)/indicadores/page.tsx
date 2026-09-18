@@ -25,6 +25,7 @@ import {
   type Periodicidade,
 } from "@/lib/periodo";
 import { Velocimetro, type StatusVelocimetro } from "@/components/Velocimetro";
+import { AINDA_PRECISA_EDITAR, AINDA_PRECISA_GRAVAR } from "@/lib/prazos";
 import {
   ESTAGIO_LABELS,
   ESTAGIO_QUADRO,
@@ -134,6 +135,8 @@ export default function IndicadoresPage() {
     () => ({
       planejado: itemsDoPeriodo.length,
       postado: itemsDoPeriodo.filter((i) => i.estagio === "postado").length,
+      gravacoesPendentes: itemsDoPeriodo.filter((i) => AINDA_PRECISA_GRAVAR.has(i.estagio)).length,
+      edicoesPendentes: itemsDoPeriodo.filter((i) => AINDA_PRECISA_EDITAR.has(i.estagio)).length,
     }),
     [itemsDoPeriodo]
   );
@@ -239,6 +242,32 @@ export default function IndicadoresPage() {
         </div>
       </div>
 
+      <div className="card p-4">
+        <div className="flex flex-wrap items-start gap-4">
+          <div className="shrink-0 text-center px-2">
+            <p className={`text-3xl font-bold ${atrasados.length > 0 ? "text-zosa-danger" : "text-zosa-teal"}`}>
+              {atrasados.length}
+            </p>
+            <p className="text-xs text-zosa-muted whitespace-nowrap">itens atrasados</p>
+          </div>
+          {atrasados.length === 0 ? (
+            <p className="text-sm text-zosa-muted self-center">Nada atrasado. 🎉</p>
+          ) : (
+            <div className="flex-1 min-w-0 flex flex-wrap gap-1.5 content-start pt-1">
+              {atrasados.map((item) => (
+                <span
+                  key={item.id}
+                  className="badge bg-zosa-dangerbg text-zosa-danger max-w-[220px] truncate"
+                  title={`${item.ideia} (${ESTAGIO_LABELS[item.estagio as Estagio]})`}
+                >
+                  {format(parseISO(item.data_planejada!), "dd/MM")} · {item.ideia}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
       <div className="grid md:grid-cols-[220px_1fr] gap-4">
         <div className="card p-4 flex flex-col items-center justify-center">
           <h2 className="text-sm font-semibold text-zosa-ink mb-1 self-start">Farol da expectativa</h2>
@@ -250,27 +279,54 @@ export default function IndicadoresPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 content-start">
-          <div className="card p-4 bg-zosa-dark">
-            <p className="text-xs font-semibold text-zosa-tealsoft">Total (todos os tipos)</p>
-            <p className="text-2xl font-bold text-white mt-1">
-              {totalMacro.postado}
-              <span className="text-base font-normal text-zosa-tealsoft"> / {totalMacro.planejado}</span>
-            </p>
-            <p className="text-xs text-zosa-tealsoft">entregues / programados</p>
-          </div>
-          {planejadoXPostado.map((r) => (
-            <div key={r.tipo} className="card p-4">
-              <p className="text-xs font-semibold" style={{ color: r.cor }}>
-                {r.tipo}
-              </p>
-              <p className="text-2xl font-bold text-zosa-ink mt-1">
-                {r.postado}
-                <span className="text-base font-normal text-zosa-muted"> / {r.planejado}</span>
-              </p>
-              <p className="text-xs text-zosa-muted">entregues / programados</p>
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-sm font-semibold text-zosa-ink mb-2">Visão geral do período</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="card p-4 bg-zosa-dark">
+                <p className="text-xs font-semibold text-zosa-tealsoft">📤 Total de posts</p>
+                <p className="text-2xl font-bold text-white mt-1">{totalMacro.postado}</p>
+                <p className="text-xs text-zosa-tealsoft">já publicados</p>
+              </div>
+              <div className="card p-4">
+                <p className="text-xs font-semibold text-zosa-ink">📋 Total de demandas</p>
+                <p className="text-2xl font-bold text-zosa-ink mt-1">{totalMacro.planejado}</p>
+                <p className="text-xs text-zosa-muted">programadas no período</p>
+              </div>
+              <div className="card p-4">
+                <p className="text-xs font-semibold" style={{ color: "var(--color-zosa-teal)" }}>
+                  🎥 Gravações pendentes
+                </p>
+                <p className="text-2xl font-bold text-zosa-ink mt-1">{totalMacro.gravacoesPendentes}</p>
+                <p className="text-xs text-zosa-muted">ainda precisam ser gravadas</p>
+              </div>
+              <div className="card p-4">
+                <p className="text-xs font-semibold" style={{ color: "var(--color-tipo-trend)" }}>
+                  ✂️ Edições pendentes
+                </p>
+                <p className="text-2xl font-bold text-zosa-ink mt-1">{totalMacro.edicoesPendentes}</p>
+                <p className="text-xs text-zosa-muted">ainda precisam ser editadas</p>
+              </div>
             </div>
-          ))}
+          </div>
+
+          <div>
+            <h2 className="text-sm font-semibold text-zosa-ink mb-2">Por tipo de conteúdo</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {planejadoXPostado.map((r) => (
+                <div key={r.tipo} className="card p-4">
+                  <p className="text-xs font-semibold" style={{ color: r.cor }}>
+                    {r.tipo}
+                  </p>
+                  <p className="text-2xl font-bold text-zosa-ink mt-1">
+                    {r.postado}
+                    <span className="text-base font-normal text-zosa-muted"> / {r.planejado}</span>
+                  </p>
+                  <p className="text-xs text-zosa-muted">entregues / programados</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -379,27 +435,6 @@ export default function IndicadoresPage() {
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </div>
-
-      <div className="card p-4">
-        <h2 className="text-sm font-semibold text-zosa-ink mb-3">
-          Itens atrasados ({atrasados.length})
-        </h2>
-        {atrasados.length === 0 ? (
-          <p className="text-sm text-zosa-muted">Nada atrasado. 🎉</p>
-        ) : (
-          <ul className="space-y-1">
-            {atrasados.map((item) => (
-              <li key={item.id} className="text-sm flex items-center gap-2">
-                <span className="badge bg-zosa-dangerbg text-zosa-danger">
-                  {format(parseISO(item.data_planejada!), "dd/MM")}
-                </span>
-                <span className="text-zosa-ink truncate">{item.ideia}</span>
-                <span className="text-zosa-muted text-xs">({ESTAGIO_LABELS[item.estagio as Estagio]})</span>
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
     </div>
   );

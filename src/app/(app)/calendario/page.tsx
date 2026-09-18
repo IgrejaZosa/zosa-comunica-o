@@ -16,16 +16,11 @@ import {
 import { ptBR } from "date-fns/locale";
 import { useContentItems } from "@/lib/hooks";
 import { useSession } from "@/lib/session-context";
-import { calcularPrazos } from "@/lib/prazos";
+import { AINDA_PRECISA_EDITAR, AINDA_PRECISA_GRAVAR, calcularPrazos } from "@/lib/prazos";
 import { ContentItemModal } from "@/components/ContentItemModal";
 import type { ContentItem } from "@/lib/types";
 
 const DIAS_SEMANA = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-
-/** Enquanto o item não chegou nesses estágios, o prazo daquela etapa
- * ainda é relevante de mostrar como lembrete no calendário. */
-const AINDA_PRECISA_GRAVAR = new Set(["backlog", "sprint", "producao"]);
-const AINDA_PRECISA_EDITAR = new Set(["backlog", "sprint", "producao", "edicao"]);
 
 export default function CalendarioPage() {
   const { items } = useContentItems();
