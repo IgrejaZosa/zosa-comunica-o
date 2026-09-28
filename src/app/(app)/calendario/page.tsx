@@ -22,6 +22,14 @@ import type { ContentItem } from "@/lib/types";
 
 const DIAS_SEMANA = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
+type EtapaDemanda = "gravacao" | "edicao" | "postagem";
+
+const ETAPA_DEMANDA_LABELS: Record<EtapaDemanda, string> = {
+  gravacao: "Gravação",
+  edicao: "Edição",
+  postagem: "Postagem",
+};
+
 export default function CalendarioPage() {
   const { items } = useContentItems();
   const { accounts, projetos, profiles } = useSession();
@@ -29,6 +37,7 @@ export default function CalendarioPage() {
   const [contaFiltro, setContaFiltro] = useState<string | null>(null);
   const [projetoFiltro, setProjetoFiltro] = useState<string | null>(null);
   const [pessoaFiltro, setPessoaFiltro] = useState<string | null>(null);
+  const [etapaFiltro, setEtapaFiltro] = useState<EtapaDemanda | null>(null);
   const [itemAberto, setItemAberto] = useState<ContentItem | "novo" | null>(null);
   const [novaData, setNovaData] = useState<string | undefined>(undefined);
 
@@ -51,6 +60,7 @@ export default function CalendarioPage() {
   }
 
   function itemsPostamNoDia(dia: Date): ContentItem[] {
+    if (etapaFiltro && etapaFiltro !== "postagem") return [];
     return itemsFiltrados.filter((i) => {
       if (!ehNoDia(i.data_planejada, dia)) return false;
       if (pessoaFiltro && i.responsavel_postagem_id !== pessoaFiltro) return false;
@@ -59,6 +69,7 @@ export default function CalendarioPage() {
   }
 
   function itemsGravamNoDia(dia: Date): ContentItem[] {
+    if (etapaFiltro && etapaFiltro !== "gravacao") return [];
     return itemsFiltrados.filter((i) => {
       if (!i.data_planejada || !AINDA_PRECISA_GRAVAR.has(i.estagio)) return false;
       if (!ehNoDia(calcularPrazos(i.data_planejada).prazoGravacao, dia)) return false;
@@ -68,6 +79,7 @@ export default function CalendarioPage() {
   }
 
   function itemsEditamNoDia(dia: Date): ContentItem[] {
+    if (etapaFiltro && etapaFiltro !== "edicao") return [];
     return itemsFiltrados.filter((i) => {
       if (!i.data_planejada || !AINDA_PRECISA_EDITAR.has(i.estagio)) return false;
       if (!ehNoDia(calcularPrazos(i.data_planejada).prazoEdicao, dia)) return false;
@@ -137,6 +149,21 @@ export default function CalendarioPage() {
             {profiles.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.nome}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="label">Etapa</label>
+          <select
+            className="input min-w-[180px]"
+            value={etapaFiltro ?? ""}
+            onChange={(e) => setEtapaFiltro((e.target.value || null) as EtapaDemanda | null)}
+          >
+            <option value="">Gravação, edição e postagem</option>
+            {(Object.entries(ETAPA_DEMANDA_LABELS) as [EtapaDemanda, string][]).map(([valor, label]) => (
+              <option key={valor} value={valor}>
+                {label}
               </option>
             ))}
           </select>
