@@ -6,7 +6,7 @@
 begin;
 
 -- ---------- Tipos ----------
-create type tipo_conteudo as enum ('reels', 'stories', 'estatico', 'trend');
+create type tipo_conteudo as enum ('reels', 'stories', 'estatico', 'trend', 'institucional', 'zosa_news');
 
 create type estagio_conteudo as enum (
   'backlog',

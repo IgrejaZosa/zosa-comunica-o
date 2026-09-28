@@ -26,6 +26,10 @@
   --color-tipo-estatico-bg: #fde68a;
   --color-tipo-trend: #db2777;
   --color-tipo-trend-bg: #fbcfe8;
+  --color-tipo-institucional: #4338ca;
+  --color-tipo-institucional-bg: #e0e7ff;
+  --color-tipo-zosa-news: #dc2626;
+  --color-tipo-zosa-news-bg: #fee2e2;
 
   /* Contas geridas pelo app */
   --color-conta-zosa: #2ca79a;
@@ -82,6 +86,10 @@
   --color-tipo-estatico-bg: var(--color-tipo-estatico-bg);
   --color-tipo-trend: var(--color-tipo-trend);
   --color-tipo-trend-bg: var(--color-tipo-trend-bg);
+  --color-tipo-institucional: var(--color-tipo-institucional);
+  --color-tipo-institucional-bg: var(--color-tipo-institucional-bg);
+  --color-tipo-zosa-news: var(--color-tipo-zosa-news);
+  --color-tipo-zosa-news-bg: var(--color-tipo-zosa-news-bg);
 
   --color-conta-zosa: var(--color-conta-zosa);
   --color-conta-zosa-bg: var(--color-conta-zosa-bg);

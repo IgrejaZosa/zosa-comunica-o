@@ -1,10 +1,12 @@
-export type TipoConteudo = "reels" | "stories" | "estatico" | "trend";
+export type TipoConteudo = "reels" | "stories" | "estatico" | "trend" | "institucional" | "zosa_news";
 
 export const TIPO_LABELS: Record<TipoConteudo, string> = {
   reels: "Reels",
   stories: "Stories",
   estatico: "Estático",
   trend: "Trend",
+  institucional: "Vídeo Institucional",
+  zosa_news: "Zosa News",
 };
 
 export const TIPO_COLORS: Record<TipoConteudo, { fg: string; bg: string }> = {
@@ -12,6 +14,8 @@ export const TIPO_COLORS: Record<TipoConteudo, { fg: string; bg: string }> = {
   stories: { fg: "var(--color-tipo-stories)", bg: "var(--color-tipo-stories-bg)" },
   estatico: { fg: "var(--color-tipo-estatico)", bg: "var(--color-tipo-estatico-bg)" },
   trend: { fg: "var(--color-tipo-trend)", bg: "var(--color-tipo-trend-bg)" },
+  institucional: { fg: "var(--color-tipo-institucional)", bg: "var(--color-tipo-institucional-bg)" },
+  zosa_news: { fg: "var(--color-tipo-zosa-news)", bg: "var(--color-tipo-zosa-news-bg)" },
 };
 
 export type Estagio =
