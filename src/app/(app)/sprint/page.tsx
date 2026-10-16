@@ -94,8 +94,7 @@ export default function SprintPage() {
             <h1 className="text-xl font-semibold text-zosa-ink">Sprint Atual</h1>
             {sprintAtual && (
               <p className="text-sm text-zosa-muted">
-                Semana de {formatarPeriodoSprint(sprintAtual.data_inicio, sprintAtual.data_fim)} · sexta pós-almoço
-                a sexta pré-almoço
+                Semana de {formatarPeriodoSprint(sprintAtual.data_inicio, sprintAtual.data_fim)} · segunda a sexta
               </p>
             )}
           </div>

@@ -50,7 +50,7 @@ create table projetos (
   created_at timestamptz not null default now()
 );
 
--- ---------- Sprints (semana: sexta pos-almoco -> sexta seguinte pre-almoco) ----------
+-- ---------- Sprints (semana: segunda -> segunda seguinte, exclusivo; termina na sexta) ----------
 create table sprints (
   id uuid primary key default gen_random_uuid(),
   data_inicio date not null unique,

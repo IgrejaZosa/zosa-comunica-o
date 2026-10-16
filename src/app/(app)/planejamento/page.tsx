@@ -6,7 +6,7 @@ import { ContentItemModal } from "@/components/ContentItemModal";
 import { ContentItemRow } from "@/components/ContentItemRow";
 import { ContentCard } from "@/components/ContentCard";
 import { api } from "@/lib/api";
-import { formatarPeriodoSprint } from "@/lib/sprint";
+import { fimExclusivoDoUltimoDia, formatarPeriodoSprint, ultimoDiaDaSprint } from "@/lib/sprint";
 import type { ContentItem, Sprint } from "@/lib/types";
 
 export default function SprintPlanningPage() {
@@ -28,7 +28,7 @@ export default function SprintPlanningPage() {
         setProximaSprint(sprint);
         setMeta(sprint.meta ?? "");
         setDataInicio(sprint.data_inicio);
-        setDataFim(sprint.data_fim);
+        setDataFim(ultimoDiaDaSprint(sprint.data_fim));
       })
       .catch((err) => console.error("sprintSeguinte:", err));
   }, []);
@@ -60,22 +60,22 @@ export default function SprintPlanningPage() {
     }
   }
 
-  /** Período da sprint calculado (sexta a sexta) às vezes não bate com a
+  /** Período da sprint calculado (segunda a sexta) às vezes não bate com a
    * semana real do time - aqui dá pra corrigir manualmente. Itens cuja
    * data de postagem cair dentro do novo período passam a usar essa
    * sprint a partir da próxima vez que forem criados/editados. */
   async function salvarPeriodo() {
     if (!proximaSprint) return;
     setErroPeriodo(null);
-    if (!dataInicio || !dataFim || dataFim <= dataInicio) {
-      setErroPeriodo("O fim do período precisa ser depois do início.");
+    if (!dataInicio || !dataFim || dataFim < dataInicio) {
+      setErroPeriodo("O último dia do período não pode ser antes do início.");
       return;
     }
     setSalvandoPeriodo(true);
     try {
       const atualizada = await api.atualizarSprint(proximaSprint.id, {
         data_inicio: dataInicio,
-        data_fim: dataFim,
+        data_fim: fimExclusivoDoUltimoDia(dataFim),
       });
       setProximaSprint(atualizada as Sprint);
     } catch (err) {

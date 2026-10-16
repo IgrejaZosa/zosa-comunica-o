@@ -1,6 +1,6 @@
 import { addDays, addMonths, addYears, format, parseISO, startOfMonth, startOfYear } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { sprintParaData } from "@/lib/sprint";
+import { sprintParaData, ultimoDiaDaSprint } from "@/lib/sprint";
 
 export type Periodicidade = "dia" | "semana" | "mes" | "semestre" | "ano";
 
@@ -19,8 +19,9 @@ function fmtISO(d: Date): string {
 }
 
 /** Início (inclusivo) e fim (exclusivo) do período que contém `refIso`,
- * no formato yyyy-MM-dd. A semana usa a mesma janela sexta-a-sexta das
- * sprints, pra bater com o resto do app. */
+ * no formato yyyy-MM-dd. A semana usa a mesma janela das sprints
+ * (segunda a sexta, com o fim de semana junto), pra bater com o resto do
+ * app. */
 export function periodoAtual(tipo: Periodicidade, refIso: string): { inicio: string; fim: string } {
   const ref = parseISO(refIso);
   switch (tipo) {
@@ -60,7 +61,7 @@ export function formatarPeriodo(tipo: Periodicidade, inicio: string, fim: string
     case "dia":
       return format(i, "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
     case "semana":
-      return `Semana de ${format(i, "dd/MM")} a ${format(parseISO(fim), "dd/MM")}`;
+      return `Semana de ${format(i, "dd/MM")} a ${format(parseISO(ultimoDiaDaSprint(fim)), "dd/MM")}`;
     case "mes":
       return format(i, "MMMM 'de' yyyy", { locale: ptBR });
     case "semestre":

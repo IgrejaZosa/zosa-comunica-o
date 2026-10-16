@@ -30,7 +30,7 @@ export async function garantirSprint(data_inicio: string, data_fim: string): Pro
  *
  * Primeiro procura uma sprint já existente cujo período (possivelmente
  * ajustado manualmente na tela de Sprint Planning) contenha essa data -
- * só cai no cálculo padrão (sexta a sexta) se nenhuma cobrir a data. */
+ * só cai no cálculo padrão (segunda a segunda) se nenhuma cobrir a data. */
 export async function calcularSprintId(dataPlanejada: string | null): Promise<string | null> {
   if (!dataPlanejada) return null;
 

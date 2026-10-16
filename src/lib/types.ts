@@ -84,8 +84,8 @@ export interface Account {
 
 export interface Sprint {
   id: string;
-  data_inicio: string; // ISO date, sexta pós-almoço
-  data_fim: string; // ISO date, sexta seguinte pré-almoço
+  data_inicio: string; // ISO date, segunda-feira
+  data_fim: string; // ISO date, exclusivo: a segunda seguinte (a sprint termina na sexta)
   meta: string | null;
   created_at: string;
 }
