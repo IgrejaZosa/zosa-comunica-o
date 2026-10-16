@@ -24,10 +24,12 @@ import {
   type Periodicidade,
 } from "@/lib/periodo";
 import { Velocimetro, type StatusVelocimetro } from "@/components/Velocimetro";
+import { ContentItemModal } from "@/components/ContentItemModal";
 import { AINDA_PRECISA_EDITAR, AINDA_PRECISA_GRAVAR } from "@/lib/prazos";
 import {
   ESTAGIO_LABELS,
   ESTAGIO_QUADRO,
+  MOTIVO_CANCELAMENTO_LABELS,
   TIPO_COLORS,
   TIPO_LABELS,
   type ContentItem,
@@ -61,6 +63,7 @@ export default function IndicadoresPage() {
   const [periodicidade, setPeriodicidade] = useState<Periodicidade>("mes");
   const [refIso, setRefIso] = useState(() => format(new Date(), "yyyy-MM-dd"));
   const [pessoaFiltro, setPessoaFiltro] = useState<string | null>(null);
+  const [itemAberto, setItemAberto] = useState<ContentItem | null>(null);
 
   const periodo = useMemo(() => periodoAtual(periodicidade, refIso), [periodicidade, refIso]);
   const labelPeriodo = useMemo(
@@ -77,10 +80,30 @@ export default function IndicadoresPage() {
     setRefIso((atual) => navegarPeriodo(periodicidade, atual, direcao));
   }
 
-  const itemsDoPeriodo = useMemo(
+  const itemsNoPeriodo = useMemo(
     () => items.filter((i) => i.data_planejada && i.data_planejada >= periodo.inicio && i.data_planejada < periodo.fim),
     [items, periodo]
   );
+
+  // Item excluído por "não fazia mais sentido" sai de todas as contas; o que
+  // "perdeu o prazo" continua contando como programado e não entregue.
+  const itemsDoPeriodo = useMemo(
+    () => itemsNoPeriodo.filter((i) => i.motivo_cancelamento !== "descartado"),
+    [itemsNoPeriodo]
+  );
+
+  const excluidosDoPeriodo = useMemo(() => {
+    const doPeriodo = itemsNoPeriodo.filter(
+      (i) =>
+        i.estagio === "cancelado" &&
+        i.motivo_cancelamento &&
+        (!pessoaFiltro || RESPONSAVEIS_ITEM.some((campo) => i[campo] === pessoaFiltro))
+    );
+    return {
+      perdeuPrazo: doPeriodo.filter((i) => i.motivo_cancelamento === "perdeu_prazo"),
+      descartados: doPeriodo.filter((i) => i.motivo_cancelamento === "descartado"),
+    };
+  }, [itemsNoPeriodo, pessoaFiltro]);
 
   const planejadoXPostado = useMemo(() => {
     return (Object.keys(TIPO_LABELS) as TipoConteudo[]).map((tipo) => {
@@ -313,16 +336,69 @@ export default function IndicadoresPage() {
           ) : (
             <div className="flex-1 min-w-0 flex flex-wrap gap-1.5 content-start pt-1">
               {atrasados.map((item) => (
-                <span
+                <button
+                  type="button"
                   key={item.id}
-                  className="badge bg-zosa-dangerbg text-zosa-danger max-w-[220px] truncate"
-                  title={`${item.ideia} (${ESTAGIO_LABELS[item.estagio as Estagio]})`}
+                  onClick={() => setItemAberto(item)}
+                  className="badge bg-zosa-dangerbg text-zosa-danger max-w-[220px] truncate hover:opacity-80"
+                  title={`${item.ideia} (${ESTAGIO_LABELS[item.estagio as Estagio]}) - clique para abrir`}
                 >
                   {format(parseISO(item.data_planejada!), "dd/MM")} · {item.ideia}
-                </span>
+                </button>
               ))}
             </div>
           )}
+        </div>
+      </div>
+
+      <div className="card p-4">
+        <h2 className="text-sm font-semibold text-zosa-ink mb-1">Excluídos do período</h2>
+        <p className="text-xs text-zosa-muted mb-3">
+          Quem perdeu o prazo continua contando como programado e não entregue; quem não fazia mais sentido sai de
+          todas as contas.
+        </p>
+        <div className="grid sm:grid-cols-2 gap-4">
+          {[
+            {
+              chave: "perdeu_prazo" as const,
+              emoji: "⏰",
+              itens: excluidosDoPeriodo.perdeuPrazo,
+              cor: "var(--color-zosa-warn)",
+              bg: "var(--color-zosa-warnbg)",
+            },
+            {
+              chave: "descartado" as const,
+              emoji: "🗑️",
+              itens: excluidosDoPeriodo.descartados,
+              cor: "var(--color-estagio-backlog)",
+              bg: "var(--color-estagio-backlog-bg)",
+            },
+          ].map(({ chave, emoji, itens, cor, bg }) => (
+            <div key={chave} className="flex items-start gap-3">
+              <div className="shrink-0 text-center px-2">
+                <p className="text-3xl font-bold" style={{ color: cor }}>
+                  {itens.length}
+                </p>
+                <p className="text-xs text-zosa-muted">
+                  {emoji} {MOTIVO_CANCELAMENTO_LABELS[chave]}
+                </p>
+              </div>
+              <div className="flex-1 min-w-0 flex flex-wrap gap-1.5 content-start pt-1">
+                {itens.map((item) => (
+                  <button
+                    type="button"
+                    key={item.id}
+                    onClick={() => setItemAberto(item)}
+                    className="badge max-w-[220px] truncate hover:opacity-80"
+                    style={{ color: cor, backgroundColor: bg }}
+                    title={`${item.ideia} - clique para abrir`}
+                  >
+                    {format(parseISO(item.data_planejada!), "dd/MM")} · {item.ideia}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -413,6 +489,8 @@ export default function IndicadoresPage() {
           </ResponsiveContainer>
         </div>
       </div>
+
+      {itemAberto && <ContentItemModal item={itemAberto} onClose={() => setItemAberto(null)} />}
     </div>
   );
 }

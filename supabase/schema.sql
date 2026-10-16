@@ -8,6 +8,8 @@ begin;
 -- ---------- Tipos ----------
 create type tipo_conteudo as enum ('reels', 'stories', 'estatico', 'trend', 'institucional', 'zosa_news');
 
+create type motivo_cancelamento as enum ('perdeu_prazo', 'descartado');
+
 create type estagio_conteudo as enum (
   'backlog',
   'sprint',
@@ -79,6 +81,7 @@ create table content_items (
   responsavel_edicao_original_id uuid references profiles (id),
   responsavel_postagem_original_id uuid references profiles (id),
   estagio estagio_conteudo not null default 'backlog',
+  motivo_cancelamento motivo_cancelamento,
   sprint_id uuid references sprints (id),
   ordem bigint not null default 0,
   created_by uuid references profiles (id),

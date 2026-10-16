@@ -49,6 +49,7 @@ export default function CalendarioPage() {
 
   const itemsFiltrados = useMemo(() => {
     return items.filter((i) => {
+      if (i.estagio === "cancelado") return false;
       if (contaFiltro && i.account_id !== contaFiltro) return false;
       if (projetoFiltro && i.projeto_id !== projetoFiltro) return false;
       return true;

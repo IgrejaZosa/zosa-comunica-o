@@ -18,7 +18,7 @@ export default function ProjetosPage() {
   const stats = useMemo(() => {
     const mapa = new Map<string, { total: number; entregues: number }>();
     for (const item of items) {
-      if (!item.projeto_id) continue;
+      if (!item.projeto_id || item.motivo_cancelamento === "descartado") continue;
       const atual = mapa.get(item.projeto_id) ?? { total: 0, entregues: 0 };
       atual.total++;
       if (item.estagio === "postado") atual.entregues++;

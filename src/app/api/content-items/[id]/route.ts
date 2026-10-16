@@ -15,8 +15,11 @@ const CAMPOS_PERMITIDOS = [
   "responsavel_edicao_id",
   "responsavel_postagem_id",
   "estagio",
+  "motivo_cancelamento",
   "ordem",
 ] as const;
+
+const MOTIVOS_VALIDOS = new Set(["perdeu_prazo", "descartado"]);
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { erro } = await exigirPerfil();
@@ -29,6 +32,12 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (campo in body) patch[campo] = body[campo];
   }
   if (Object.keys(patch).length === 0) return erroJson("Nada para atualizar.");
+
+  if (patch.motivo_cancelamento != null && !MOTIVOS_VALIDOS.has(patch.motivo_cancelamento as string)) {
+    return erroJson("Motivo de exclusão inválido.");
+  }
+  // o motivo só faz sentido em item cancelado: ao sair desse estágio, limpa
+  if ("estagio" in patch && patch.estagio !== "cancelado") patch.motivo_cancelamento = null;
 
   // sprint_id nunca é enviado pelo cliente - deriva sempre da data
   // planejada, pra sprint_id nunca ficar fora de sincronia com a data.

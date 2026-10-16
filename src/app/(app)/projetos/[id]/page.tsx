@@ -24,7 +24,10 @@ export default function ProjetoDetalhePage() {
 
   const projeto = projetos.find((p) => p.id === id);
 
-  const itensDoProjeto = useMemo(() => items.filter((i) => i.projeto_id === id), [items, id]);
+  const itensDoProjeto = useMemo(
+    () => items.filter((i) => i.projeto_id === id && i.motivo_cancelamento !== "descartado"),
+    [items, id]
+  );
   const emAndamento = useMemo(
     () => itensDoProjeto.filter((i) => i.estagio !== "backlog" && i.estagio !== "cancelado"),
     [itensDoProjeto]

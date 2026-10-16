@@ -37,6 +37,16 @@ export const ESTAGIO_LABELS: Record<Estagio, string> = {
   cancelado: "Cancelado",
 };
 
+/** Por que um item foi excluído (estágio "cancelado"): não foi postado a
+ * tempo, ou deixou de fazer sentido. Usado nos Indicadores pra distinguir
+ * os dois casos. */
+export type MotivoCancelamento = "perdeu_prazo" | "descartado";
+
+export const MOTIVO_CANCELAMENTO_LABELS: Record<MotivoCancelamento, string> = {
+  perdeu_prazo: "Perdeu o prazo de postagem",
+  descartado: "Não fazia mais sentido",
+};
+
 /** Ordem das colunas do quadro Scrum (backlog e cancelado ficam fora do
  * quadro padrão, que mostra só o fluxo ativo da sprint). */
 export const ESTAGIO_QUADRO: Estagio[] = [
@@ -116,6 +126,7 @@ export interface ContentItem {
   responsavel_edicao_original_id: string | null;
   responsavel_postagem_original_id: string | null;
   estagio: Estagio;
+  motivo_cancelamento: MotivoCancelamento | null;
   sprint_id: string | null;
   ordem: number;
   created_by: string | null;

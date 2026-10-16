@@ -37,7 +37,7 @@ export default function SprintPage() {
   }, []);
 
   const itemsDaSprint = useMemo(
-    () => (sprintAtual ? items.filter((i) => i.sprint_id === sprintAtual.id) : []),
+    () => (sprintAtual ? items.filter((i) => i.sprint_id === sprintAtual.id && i.estagio !== "cancelado") : []),
     [items, sprintAtual]
   );
 

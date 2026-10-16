@@ -10,9 +10,11 @@ import { TimeTracker } from "@/components/TimeTracker";
 import { ProjetoSelect } from "@/components/ProjetoSelect";
 import {
   ESTAGIO_LABELS,
+  MOTIVO_CANCELAMENTO_LABELS,
   TIPO_LABELS,
   type ContentItem,
   type Estagio,
+  type MotivoCancelamento,
   type TipoConteudo,
 } from "@/lib/types";
 
@@ -46,7 +48,9 @@ export function ContentItemModal({
     responsavel_edicao_id: item?.responsavel_edicao_id ?? "",
     responsavel_postagem_id: item?.responsavel_postagem_id ?? "",
     estagio: (item?.estagio ?? defaults?.estagio ?? "backlog") as Estagio,
+    motivo_cancelamento: (item?.motivo_cancelamento ?? "") as MotivoCancelamento | "",
   });
+  const [escolhendoMotivo, setEscolhendoMotivo] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
@@ -72,6 +76,7 @@ export function ContentItemModal({
         responsavel_gravacao_id: form.responsavel_gravacao_id || null,
         responsavel_edicao_id: form.responsavel_edicao_id || null,
         responsavel_postagem_id: form.responsavel_postagem_id || null,
+        motivo_cancelamento: form.estagio === "cancelado" ? form.motivo_cancelamento || null : null,
       };
       if (item) {
         await api.atualizarItem(item.id, payload);
@@ -86,9 +91,24 @@ export function ContentItemModal({
     }
   }
 
-  async function excluir() {
+  /** "Excluir" não apaga: marca como cancelado e registra o motivo, pra os
+   * Indicadores separarem o que perdeu o prazo do que deixou de fazer
+   * sentido. O item some do calendário e do quadro. */
+  async function excluirComMotivo(motivo: MotivoCancelamento) {
     if (!item) return;
-    if (!confirm("Excluir este item de conteúdo? Essa ação não pode ser desfeita.")) return;
+    setSalvando(true);
+    try {
+      await api.atualizarItem(item.id, { estagio: "cancelado", motivo_cancelamento: motivo });
+      onClose();
+    } catch (err) {
+      setErro(err instanceof Error ? err.message : "Erro ao excluir.");
+      setSalvando(false);
+    }
+  }
+
+  async function excluirDefinitivamente() {
+    if (!item) return;
+    if (!confirm("Apagar de vez este item? Ele some também dos Indicadores e essa ação não pode ser desfeita.")) return;
     setSalvando(true);
     try {
       await api.excluirItem(item.id);
@@ -190,6 +210,24 @@ export function ContentItemModal({
             </div>
           </div>
 
+          {form.estagio === "cancelado" && (
+            <div>
+              <label className="label">Motivo da exclusão</label>
+              <select
+                className="input"
+                value={form.motivo_cancelamento}
+                onChange={(e) => setCampo("motivo_cancelamento", e.target.value as MotivoCancelamento | "")}
+              >
+                <option value="">—</option>
+                {Object.entries(MOTIVO_CANCELAMENTO_LABELS).map(([v, label]) => (
+                  <option key={v} value={v}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           {form.data_planejada && (
             <div className="flex gap-4 rounded-lg bg-zosa-cream px-3 py-2 text-xs text-zosa-muted">
               {(() => {
@@ -264,13 +302,59 @@ export function ContentItemModal({
 
           {erro && <p className="text-sm text-zosa-danger">{erro}</p>}
 
+          {escolhendoMotivo && (
+            <div className="rounded-lg border border-zosa-border bg-zosa-cream p-3 space-y-2">
+              <p className="text-sm font-medium text-zosa-ink">Por que está excluindo este item?</p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => excluirComMotivo("perdeu_prazo")}
+                  disabled={salvando}
+                >
+                  ⏰ {MOTIVO_CANCELAMENTO_LABELS.perdeu_prazo}
+                </button>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => excluirComMotivo("descartado")}
+                  disabled={salvando}
+                >
+                  🗑️ {MOTIVO_CANCELAMENTO_LABELS.descartado}
+                </button>
+                <button type="button" className="btn-ghost" onClick={() => setEscolhendoMotivo(false)}>
+                  Voltar
+                </button>
+              </div>
+              <p className="text-xs text-zosa-muted">
+                O item sai do calendário e do quadro, mas continua registrado nos Indicadores com o motivo.
+              </p>
+            </div>
+          )}
+
           <div className="flex items-center justify-between pt-2">
             {item ? (
               <div className="flex gap-2">
-                <button type="button" className="btn-ghost text-zosa-danger" onClick={excluir} disabled={salvando}>
-                  Excluir
-                </button>
-                {item.sprint_id && (
+                {item.estagio === "cancelado" ? (
+                  <button
+                    type="button"
+                    className="btn-ghost text-zosa-danger"
+                    onClick={excluirDefinitivamente}
+                    disabled={salvando}
+                  >
+                    Apagar de vez
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn-ghost text-zosa-danger"
+                    onClick={() => setEscolhendoMotivo(true)}
+                    disabled={salvando}
+                  >
+                    Excluir
+                  </button>
+                )}
+                {item.sprint_id && item.estagio !== "cancelado" && (
                   <button type="button" className="btn-ghost" onClick={tirarDaSprint} disabled={salvando}>
                     Tirar da sprint
                   </button>

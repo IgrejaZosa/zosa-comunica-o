@@ -34,7 +34,7 @@ export default function SprintPlanningPage() {
   }, []);
 
   const jaProgramados = useMemo(
-    () => (proximaSprint ? items.filter((i) => i.sprint_id === proximaSprint.id) : []),
+    () => (proximaSprint ? items.filter((i) => i.sprint_id === proximaSprint.id && i.estagio !== "cancelado") : []),
     [items, proximaSprint]
   );
 

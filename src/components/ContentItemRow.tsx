@@ -40,7 +40,15 @@ export function ContentItemRow({
         {item.ideia}
       </td>
       <td className="px-2 py-2">
-        <Badge label={ESTAGIO_LABELS[item.estagio]} fg={estagioCor.fg} bg={estagioCor.bg} />
+        <Badge
+          label={
+            item.estagio === "cancelado" && item.motivo_cancelamento
+              ? `Cancelado · ${item.motivo_cancelamento === "perdeu_prazo" ? "perdeu o prazo" : "descartado"}`
+              : ESTAGIO_LABELS[item.estagio]
+          }
+          fg={estagioCor.fg}
+          bg={estagioCor.bg}
+        />
       </td>
       <td className="px-2 py-2 text-xs whitespace-nowrap">{postador?.nome ?? "—"}</td>
       <td className="px-2 py-2 whitespace-nowrap">
